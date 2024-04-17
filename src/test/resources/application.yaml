@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: EventsHistory
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+webprotege:
+  rabbitmq:
+    requestqueue: webprotege-events-history-queue
+    responsequeue: webprotege-events-history-response
+    eventsqueue: webprotege-events-history-event-queue
+    timeout: 60000
+    event-subscribe: true

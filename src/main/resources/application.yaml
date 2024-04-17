@@ -1,0 +1,23 @@
+server:
+  port: 7761
+
+spring:
+  application:
+    name: EventsHistoryService
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+  data.mongodb:
+    host: mongo
+    database: webprotege
+    auto-index-creation: true
+
+webprotege:
+  rabbitmq:
+    requestqueue: webprotege-events-history-queue
+    responsequeue: webprotege-events-history-response
+    eventsqueue: webprotege-events-history-event-queue
+    timeout: 60000
+    event-subscribe: true
