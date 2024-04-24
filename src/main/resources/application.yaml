@@ -1,6 +1,8 @@
 server:
   port: 7761
 
+logging.level.root: DEBUG
+
 spring:
   application:
     name: EventsHistoryService
