@@ -41,9 +41,6 @@ public class HighLevelBusinessEventsServiceTest {
     @Mock
     private SequenceService sequenceService;
 
-    @Mock
-    private SimpMessagingTemplate simpMessagingTemplate;
-
     private HighLevelBusinessEventsService service;
 
     private PackagedProjectChangeEvent packagedProjectChangeEvent;
@@ -56,12 +53,11 @@ public class HighLevelBusinessEventsServiceTest {
     private ObjectMapper objectMapper;
     private final ArgumentCaptor<HighLevelBusinessEvent> captor = ArgumentCaptor.forClass(HighLevelBusinessEvent.class);
 
-    private final ArgumentCaptor<GenericMessage> websocketCaptor = ArgumentCaptor.forClass(GenericMessage.class);
 
     @Before
     public void setUp() {
         objectMapper = new ObjectMapperConfiguration().objectMapper();
-        service = new HighLevelBusinessEventsService(repository, objectMapper, sequenceService, simpMessagingTemplate);
+        service = new HighLevelBusinessEventsService(repository, objectMapper, sequenceService);
         projectId = ProjectId.generate();
         eventId = EventId.generate();
         entityTagsChangedEvent = new EntityTagsChangedEvent(new EventId("eventId"),
@@ -87,23 +83,6 @@ public class HighLevelBusinessEventsServiceTest {
         assertEquals(projectId.id(), highLevelEvent.projectId());
     }
 
-    @Test
-    public void GIVEN_entityTagsChangedEvent_WHEN_registerEvent_THEN_eventIsPushedToWebsocket() throws JsonProcessingException {
-        service.registerEvent(packagedProjectChangeEvent);
-
-
-        verify(simpMessagingTemplate).send(eq("/topic/project-events/" + projectId.id()), websocketCaptor.capture());
-
-        var capturedMessage = websocketCaptor.getValue();
-        ProjectEventsQueryResponse response = new ProjectEventsQueryResponse();
-        response.events = new EventList(EventTag.getFirst(), packagedProjectChangeEvent.projectEvents(), EventTag.get(1));
-
-        String expectedEvent = objectMapper.writeValueAsString(response);
-
-
-        assertEquals(objectMapper.readTree(expectedEvent), objectMapper.readTree(new String( (byte[]) capturedMessage.getPayload())));
-
-    }
     @Test
     public void GIVEN_entityTagsChangedEvent_WHEN_registerEvent_THEN_eventIsMapped() {
         service.registerEvent(packagedProjectChangeEvent);

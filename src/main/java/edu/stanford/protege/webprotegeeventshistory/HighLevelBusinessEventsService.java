@@ -7,8 +7,6 @@ import edu.stanford.protege.webprotegeeventshistory.sequence.SequenceService;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,23 +26,16 @@ public class HighLevelBusinessEventsService {
 
     private final SequenceService sequenceService;
 
-    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public HighLevelBusinessEventsService(HighLevelBusinessEventsRepository repository, ObjectMapper objectMapper, SequenceService sequenceService, SimpMessagingTemplate simpMessagingTemplate) {
+    public HighLevelBusinessEventsService(HighLevelBusinessEventsRepository repository, ObjectMapper objectMapper, SequenceService sequenceService) {
         this.repository = repository;
         this.objectMapper = objectMapper;
         this.sequenceService = sequenceService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
 
     @Transactional
     void registerEvent(PackagedProjectChangeEvent projectEvent) {
-        sendEventsToWebsocket(projectEvent);
-        saveEventsIntoDatabase(projectEvent);
-    }
-
-    private void saveEventsIntoDatabase(PackagedProjectChangeEvent projectEvent) {
         try {
             var nextDocument = objectMapper.convertValue(projectEvent, Document.class);
 
@@ -53,17 +44,6 @@ public class HighLevelBusinessEventsService {
             repository.save(event);
         } catch (Exception e) {
             LOGGER.error("An error occurred when trying to save events", e);
-        }
-    }
-
-    private void sendEventsToWebsocket(PackagedProjectChangeEvent event) {
-        try {
-            ProjectEventsQueryResponse response = new ProjectEventsQueryResponse();
-            response.events = new EventList(EventTag.getFirst(), event.projectEvents(), EventTag.get(1));
-            simpMessagingTemplate.send("/topic/project-events/" + event.projectId().id(), new GenericMessage<>(objectMapper.writeValueAsBytes(response)));
-
-        } catch (Exception e) {
-            LOGGER.error("Error forwarding the events through websocket");
         }
     }
 

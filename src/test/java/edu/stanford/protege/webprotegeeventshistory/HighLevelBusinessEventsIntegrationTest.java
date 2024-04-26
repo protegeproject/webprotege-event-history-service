@@ -55,7 +55,7 @@ public class HighLevelBusinessEventsIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void GIVEN_newEvent_WHEN_register_THEN_eventIsSavedInDb() throws InterruptedException, com.fasterxml.jackson.core.JsonProcessingException {
+    public void GIVEN_newEvent_WHEN_register_THEN_eventIsSavedInDb() throws InterruptedException {
 
         var entityTagsChangedEvent = new EntityTagsChangedEvent(new EventId("eventId"),
                 projectId,
