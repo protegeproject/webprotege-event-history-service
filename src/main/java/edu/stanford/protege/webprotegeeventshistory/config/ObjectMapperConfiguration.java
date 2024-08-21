@@ -24,6 +24,7 @@ import edu.stanford.protege.webprotege.tag.EntityTagsChangedEvent;
 import edu.stanford.protege.webprotege.tag.ProjectTagsChangedEvent;
 import edu.stanford.protege.webprotege.watches.WatchAddedEvent;
 import edu.stanford.protege.webprotege.watches.WatchRemovedEvent;
+import edu.stanford.protege.webprotegeeventshistory.config.events.ProjectLinearizationChangedEvent;
 import org.semanticweb.owlapi.model.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -313,6 +314,7 @@ public class ObjectMapperConfiguration {
                     OntologyBrowserTextChangedEvent.class,
                     PermissionsChangedEvent.class,
                     ProjectChangedEvent.class,
+                    ProjectLinearizationChangedEvent.class,
                     ProjectMovedToTrashEvent.class,
                     OntologyChangedEvent.class,
                     ProjectRemovedFromTrashEvent.class,
