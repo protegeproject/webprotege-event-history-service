@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>edu.stanford.protege</groupId>
 	<artifactId>webprotege-event-history-service</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 	<name>webprotege-event-history-service</name>
 	<description>Service that contains business specific events in order to be queried</description>
 	<properties>
