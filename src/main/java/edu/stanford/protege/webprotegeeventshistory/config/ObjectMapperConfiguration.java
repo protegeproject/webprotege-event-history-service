@@ -1,9 +1,7 @@
 package edu.stanford.protege.webprotegeeventshistory.config;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -12,22 +10,17 @@ import edu.stanford.protege.webprotege.change.OntologyChangedEvent;
 import edu.stanford.protege.webprotege.event.*;
 import edu.stanford.protege.webprotege.frame.*;
 import edu.stanford.protege.webprotege.hierarchy.EntityHierarchyChangedEvent;
-import edu.stanford.protege.webprotege.issues.CommentPostedEvent;
-import edu.stanford.protege.webprotege.issues.CommentUpdatedEvent;
-import edu.stanford.protege.webprotege.issues.DiscussionThreadCreatedEvent;
-import edu.stanford.protege.webprotege.issues.DiscussionThreadStatusChangedEvent;
+import edu.stanford.protege.webprotege.issues.*;
 import edu.stanford.protege.webprotege.jackson.*;
 import edu.stanford.protege.webprotege.lang.DisplayNameSettingsChangedEvent;
 import edu.stanford.protege.webprotege.permissions.PermissionsChangedEvent;
 import edu.stanford.protege.webprotege.projectsettings.ProjectSettingsChangedEvent;
-import edu.stanford.protege.webprotege.tag.EntityTagsChangedEvent;
-import edu.stanford.protege.webprotege.tag.ProjectTagsChangedEvent;
-import edu.stanford.protege.webprotege.watches.WatchAddedEvent;
-import edu.stanford.protege.webprotege.watches.WatchRemovedEvent;
+import edu.stanford.protege.webprotege.tag.*;
+import edu.stanford.protege.webprotege.watches.*;
 import edu.stanford.protege.webprotegeeventshistory.config.events.ProjectLinearizationChangedEvent;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
 import org.semanticweb.owlapi.model.*;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 import uk.ac.manchester.cs.owl.owlapi.*;
 
 @Configuration
@@ -315,6 +308,8 @@ public class ObjectMapperConfiguration {
                     PermissionsChangedEvent.class,
                     ProjectChangedEvent.class,
                     ProjectLinearizationChangedEvent.class,
+                    RevisionsEvent.class,
+                    NewLinearizationRevisionsEvent.class,
                     ProjectMovedToTrashEvent.class,
                     OntologyChangedEvent.class,
                     ProjectRemovedFromTrashEvent.class,

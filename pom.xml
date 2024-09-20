@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>edu.stanford.protege</groupId>
 	<artifactId>webprotege-event-history-service</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.4-WHO</version>
 	<name>webprotege-event-history-service</name>
 	<description>Service that contains business specific events in order to be queried</description>
 	<properties>
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>webprotege-entity-frames</artifactId>
-			<version>0.9.2</version>
+			<version>0.9.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -78,13 +78,13 @@
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>webprotege-backend-api</artifactId>
-			<version>1.0.3</version>
+			<version>1.0.26-WHO</version>
 		</dependency>
 
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>webprotege-common</artifactId>
-			<version>0.9.6</version>
+			<version>0.9.8</version>
 		</dependency>
 
 		<dependency>
@@ -96,7 +96,7 @@
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>webprotege-ipc</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
