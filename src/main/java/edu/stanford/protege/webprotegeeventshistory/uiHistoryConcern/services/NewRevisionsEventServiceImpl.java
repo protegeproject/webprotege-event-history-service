@@ -40,7 +40,7 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
 
     @Override
     public Page<ProjectChange> fetchPaginatedProjectChanges(ProjectId projectId, Optional<OWLEntity> subject, int pageNumber, int pageSize) {
-        String entityIriSubject = subject.map( sub -> sub.getIRI().toString()).orElse(null);
+        String entityIriSubject = subject.map(sub -> sub.getIRI().toString()).orElse(null);
         RevisionsEvent probe = new RevisionsEvent(
                 projectId,
                 entityIriSubject,
@@ -55,7 +55,9 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
 
         Example<RevisionsEvent> example = Example.of(probe, matcher);
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, TIMESTAMP));
+        //Page number from ui is starting from 1
+        //PageRequest from spring-data is starting from 0
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, TIMESTAMP));
 
         org.springframework.data.domain.Page<RevisionsEvent> revisionsEventPage = repository.findAll(example, pageable);
 
@@ -63,6 +65,10 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
                 .map(revisionsEvent -> projectChangeMapper.mapProjectChangeDocumentToProjectChange(revisionsEvent.projectChange()))
                 .toList();
 
-        return Page.create(pageNumber + 1, revisionsEventPage.getTotalPages(), changes, revisionsEventPage.getTotalElements());
+        int pageCount = revisionsEventPage.getTotalPages() == 0 ? 1 : revisionsEventPage.getTotalPages();
+
+        //Page number from ui is starting from 1
+        //PageRequest from spring-data is starting from 0
+        return Page.create(pageNumber, pageCount, changes, revisionsEventPage.getTotalElements());
     }
 }

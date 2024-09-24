@@ -8,6 +8,7 @@ import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.Revi
 import org.bson.Document;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -20,7 +21,7 @@ public class RevisionEventMapper {
         this.objectMapper = objectMapper;
     }
 
-    public List<RevisionsEvent> mapNewLinearizationRevisionsEventToRevisionsEvents(ProjectId projectId, Set<ProjectChangeForEntity> changes) {
+    public List<RevisionsEvent> mapNewLinearizationRevisionsEventToRevisionsEvents(ProjectId projectId, @Nonnull Set<ProjectChangeForEntity> changes) {
 
         List<RevisionsEvent> revisionsEvents = changes.stream()
                 .flatMap(projectChangeForEntity -> {
