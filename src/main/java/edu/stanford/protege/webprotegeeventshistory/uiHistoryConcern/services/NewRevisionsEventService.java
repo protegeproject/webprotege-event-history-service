@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface NewRevisionsEventService {
 
-    void registerEvent(NewLinearizationRevisionsEvent newLinRevEvent);
+    void registerEvent(NewRevisionsEvent newLinRevEvent);
 
     Page<ProjectChange> fetchPaginatedProjectChanges(ProjectId projectId, Optional<OWLEntity> subject, int pageNumber, int pageSize);
 }

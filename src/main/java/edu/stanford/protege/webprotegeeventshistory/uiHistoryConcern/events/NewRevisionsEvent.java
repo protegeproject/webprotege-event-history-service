@@ -7,30 +7,28 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.*;
 
-import static edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.NewLinearizationRevisionsEvent.CHANNEL;
+import static edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.NewRevisionsEvent.CHANNEL;
 
 
 @JsonTypeName(CHANNEL)
-public record NewLinearizationRevisionsEvent(
+public record NewRevisionsEvent(
         EventId eventId,
         ProjectId projectId,
         Set<ProjectChangeForEntity> changes
 ) implements ProjectEvent {
-    public final static String CHANNEL = "webprotege.events.projects.linearizations.NewLinearizationRevisionsEvent";
+    public final static String CHANNEL = "webprotege.events.projects.uiHistory.NewRevisionsEvent";
 
-    public static NewLinearizationRevisionsEvent create(EventId eventId,
-                                                        ProjectId projectId,
-                                                        Set<ProjectChangeForEntity> changes) {
-        return new NewLinearizationRevisionsEvent(eventId, projectId, changes);
+    public static NewRevisionsEvent create(EventId eventId,
+                                           ProjectId projectId,
+                                           Set<ProjectChangeForEntity> changes) {
+        return new NewRevisionsEvent(eventId, projectId, changes);
     }
 
-    @NotNull
     @Override
     public ProjectId projectId() {
         return projectId;
     }
 
-    @NotNull
     @Override
     public EventId eventId() {
         return eventId;

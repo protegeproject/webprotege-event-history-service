@@ -32,8 +32,8 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
     }
 
     @Override
-    public void registerEvent(NewLinearizationRevisionsEvent newLinRevEvent) {
-        List<RevisionsEvent> revisionsEvents = revisionEventMapper.mapNewLinearizationRevisionsEventToRevisionsEvents(newLinRevEvent.projectId(), newLinRevEvent.changes());
+    public void registerEvent(NewRevisionsEvent newLinRevEvent) {
+        List<RevisionsEvent> revisionsEvents = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(newLinRevEvent);
 
         repository.saveAll(revisionsEvents);
     }

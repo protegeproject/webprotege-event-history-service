@@ -26,10 +26,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ExtendWith({SpringExtension.class, RabbitTestExtension.class, MongoTestExtension.class})
 @ActiveProfiles("test")
-public class NewLinearizationRevisionsEventHandlerIntegrationTest {
+public class NewRevisionsEventHandlerIntegrationTest {
 
     @Autowired
-    private NewLinearizationRevisionsEventHandler handler;
+    private NewRevisionsEventHandler handler;
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -50,7 +50,7 @@ public class NewLinearizationRevisionsEventHandlerIntegrationTest {
         changes.add(ProjectChangeForEntity.create("whoficEntityIri1", projectChange1));
         changes.add(ProjectChangeForEntity.create("whoficEntityIri2", projectChange2));
 
-        NewLinearizationRevisionsEvent newLinRevEvent = NewLinearizationRevisionsEvent.create(EventId.generate(), projectId, changes);
+        NewRevisionsEvent newLinRevEvent = NewRevisionsEvent.create(EventId.generate(), projectId, changes);
 
         handler.handleEvent(newLinRevEvent);
 
@@ -73,7 +73,7 @@ public class NewLinearizationRevisionsEventHandlerIntegrationTest {
         ProjectId projectId = ProjectId.generate();
         Set<ProjectChangeForEntity> emptyChanges = new LinkedHashSet<>();
 
-        NewLinearizationRevisionsEvent emptyEvent = NewLinearizationRevisionsEvent.create(EventId.generate(), projectId, emptyChanges);
+        NewRevisionsEvent emptyEvent = NewRevisionsEvent.create(EventId.generate(), projectId, emptyChanges);
 
         handler.handleEvent(emptyEvent);
 
@@ -83,7 +83,7 @@ public class NewLinearizationRevisionsEventHandlerIntegrationTest {
 
     @Test
     public void GIVEN_nullEvent_WHEN_handleEventCalled_THEN_throwException() {
-        NewLinearizationRevisionsEvent nullEvent = null;
+        NewRevisionsEvent nullEvent = null;
 
         assertThrows(NullPointerException.class, () -> handler.handleEvent(nullEvent));
     }
@@ -106,8 +106,8 @@ public class NewLinearizationRevisionsEventHandlerIntegrationTest {
 
         changesForSecondEvent.add(ProjectChangeForEntity.create("whoficEntityIri3", projectChange3));
 
-        NewLinearizationRevisionsEvent firstEvent = NewLinearizationRevisionsEvent.create(EventId.generate(), projectId1, changesForFirstEvent);
-        NewLinearizationRevisionsEvent secondEvent = NewLinearizationRevisionsEvent.create(EventId.generate(), projectId2, changesForSecondEvent);
+        NewRevisionsEvent firstEvent = NewRevisionsEvent.create(EventId.generate(), projectId1, changesForFirstEvent);
+        NewRevisionsEvent secondEvent = NewRevisionsEvent.create(EventId.generate(), projectId2, changesForSecondEvent);
 
         handler.handleEvent(firstEvent);
         handler.handleEvent(secondEvent);

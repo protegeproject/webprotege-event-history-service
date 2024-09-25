@@ -41,21 +41,20 @@ public class NewRevisionsEventServiceTest {
     public void GIVEN_validNewLinearizationRevisionsEvent_WHEN_registerEventCalled_THEN_revisionsEventsSavedToRepository() {
         ProjectId projectId = new ProjectId("testProjectId");
         Set<ProjectChangeForEntity> changes = Set.of(mock(ProjectChangeForEntity.class));
-        NewLinearizationRevisionsEvent event = NewLinearizationRevisionsEvent.create(EventId.generate(), projectId, changes);
+        NewRevisionsEvent event = NewRevisionsEvent.create(EventId.generate(), projectId, changes);
 
         RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, "whoficEntityIri", 12345L, new Document());
-        when(revisionEventMapper.mapNewLinearizationRevisionsEventToRevisionsEvents(projectId, changes))
+        when(revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(event))
                 .thenReturn(List.of(mockRevisionsEvent));
 
         service.registerEvent(event);
 
         verify(repository).saveAll(any());
-        verify(revisionEventMapper).mapNewLinearizationRevisionsEventToRevisionsEvents(projectId, changes);
+        verify(revisionEventMapper).mapNewRevisionsEventToRevisionsEvents(event);
     }
 
     @Test
     public void GIVEN_validProjectIdAndSubject_WHEN_fetchPaginatedProjectChangesCalled_THEN_returnPaginatedProjectChanges() {
-        // GIVEN
         ProjectId projectId = new ProjectId("testProjectId");
         OWLEntity mockEntity = mock(OWLEntity.class);
         IRI mockIri = IRI.create("http://example.com/entity");
@@ -70,10 +69,8 @@ public class NewRevisionsEventServiceTest {
         ProjectChange mockProjectChange = mock(ProjectChange.class);
         when(projectChangeMapper.mapProjectChangeDocumentToProjectChange(any())).thenReturn(mockProjectChange);
 
-        // WHEN
         Page<ProjectChange> result = service.fetchPaginatedProjectChanges(projectId, Optional.of(mockEntity), 1, 1);
 
-        // THEN
         assertNotNull(result);
         assertEquals(1, result.getPageElements().size());
         assertEquals(mockProjectChange, result.getPageElements().get(0));
@@ -84,7 +81,6 @@ public class NewRevisionsEventServiceTest {
 
     @Test
     public void GIVEN_nullSubject_WHEN_fetchPaginatedProjectChangesCalled_THEN_returnPaginatedProjectChanges() {
-        // GIVEN
         ProjectId projectId = new ProjectId("testProjectId");
 
         RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, null, 12345L, new Document());
@@ -96,10 +92,8 @@ public class NewRevisionsEventServiceTest {
         ProjectChange mockProjectChange = mock(ProjectChange.class);
         when(projectChangeMapper.mapProjectChangeDocumentToProjectChange(any())).thenReturn(mockProjectChange);
 
-        // WHEN
         Page<ProjectChange> result = service.fetchPaginatedProjectChanges(projectId, Optional.empty(), 1, 1);
 
-        // THEN
         assertNotNull(result);
         assertEquals(1, result.getPageElements().size());
         assertEquals(mockProjectChange, result.getPageElements().get(0));

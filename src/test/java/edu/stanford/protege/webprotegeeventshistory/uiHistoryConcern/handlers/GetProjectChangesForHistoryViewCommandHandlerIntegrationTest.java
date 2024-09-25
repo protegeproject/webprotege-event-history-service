@@ -45,7 +45,6 @@ public class GetProjectChangesForHistoryViewCommandHandlerIntegrationTest {
 
     @Test
     public void GIVEN_validRequestWithSubject_WHEN_handleRequestCalled_THEN_returnCorrectProjectChanges() {
-        // GIVEN
         ProjectId projectId = ProjectId.generate();
         OWLEntity subject = mockOWLEntity("http://example.com/Entity1");
         PageRequest pageRequest = PageRequest.requestPageWithSize(1, 10);

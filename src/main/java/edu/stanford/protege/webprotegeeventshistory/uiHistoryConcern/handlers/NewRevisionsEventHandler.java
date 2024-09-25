@@ -1,25 +1,25 @@
 package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.handlers;
 
 import edu.stanford.protege.webprotege.ipc.EventHandler;
-import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.NewLinearizationRevisionsEvent;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.NewRevisionsEvent;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services.NewRevisionsEventService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 
 @Component
-public class NewLinearizationRevisionsEventHandler implements EventHandler<NewLinearizationRevisionsEvent> {
+public class NewRevisionsEventHandler implements EventHandler<NewRevisionsEvent> {
 
     private final NewRevisionsEventService linRevisionsEventService;
 
-    public NewLinearizationRevisionsEventHandler(NewRevisionsEventService linRevisionsEventService) {
+    public NewRevisionsEventHandler(NewRevisionsEventService linRevisionsEventService) {
         this.linRevisionsEventService = linRevisionsEventService;
     }
 
     @Nonnull
     @Override
     public String getChannelName() {
-        return NewLinearizationRevisionsEvent.CHANNEL;
+        return NewRevisionsEvent.CHANNEL;
     }
 
     @Nonnull
@@ -29,12 +29,12 @@ public class NewLinearizationRevisionsEventHandler implements EventHandler<NewLi
     }
 
     @Override
-    public Class<NewLinearizationRevisionsEvent> getEventClass() {
-        return NewLinearizationRevisionsEvent.class;
+    public Class<NewRevisionsEvent> getEventClass() {
+        return NewRevisionsEvent.class;
     }
 
     @Override
-    public void handleEvent(NewLinearizationRevisionsEvent event) {
+    public void handleEvent(NewRevisionsEvent event) {
         linRevisionsEventService.registerEvent(event);
     }
 }

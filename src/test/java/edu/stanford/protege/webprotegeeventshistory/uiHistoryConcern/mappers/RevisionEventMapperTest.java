@@ -2,9 +2,9 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.webprotege.change.ProjectChange;
-import edu.stanford.protege.webprotege.common.ProjectId;
+import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ProjectChangeForEntity;
-import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.RevisionsEvent;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
 import org.bson.Document;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ public class RevisionEventMapperTest {
         Document mockDocument = new Document();
         when(objectMapper.convertValue(mockProjectChange, Document.class)).thenReturn(mockDocument);
 
-        List<RevisionsEvent> result = revisionEventMapper.mapNewLinearizationRevisionsEventToRevisionsEvents(projectId, changes);
+        List<RevisionsEvent> result = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, changes));
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -63,7 +63,7 @@ public class RevisionEventMapperTest {
         ProjectId projectId = new ProjectId("testProjectId");
         Set<ProjectChangeForEntity> emptyChanges = Set.of();
 
-        List<RevisionsEvent> result = revisionEventMapper.mapNewLinearizationRevisionsEventToRevisionsEvents(projectId, emptyChanges);
+        List<RevisionsEvent> result = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, emptyChanges));
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -75,7 +75,7 @@ public class RevisionEventMapperTest {
         ProjectId projectId = new ProjectId("testProjectId");
         Set<ProjectChangeForEntity> nullChanges = null;
 
-        assertThrows(NullPointerException.class, () -> revisionEventMapper.mapNewLinearizationRevisionsEventToRevisionsEvents(projectId, nullChanges));
+        assertThrows(NullPointerException.class, () -> revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, nullChanges)));
 
         verifyNoInteractions(objectMapper);
     }
