@@ -3,6 +3,7 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services;
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.Page;
 import edu.stanford.protege.webprotege.common.*;
+import edu.stanford.protege.webprotegeeventshistory.config.events.UpdateUiHistoryEvent;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.repositories.RevisionsEventRepository;
@@ -32,8 +33,8 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
     }
 
     @Override
-    public void registerEvent(NewRevisionsEvent newLinRevEvent) {
-        List<RevisionsEvent> revisionsEvents = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(newLinRevEvent);
+    public void registerEvent(NewRevisionsEvent newRevEvent) {
+        List<RevisionsEvent> revisionsEvents = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(newRevEvent);
 
         repository.saveAll(revisionsEvents);
     }
@@ -60,15 +61,16 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, TIMESTAMP));
 
         org.springframework.data.domain.Page<RevisionsEvent> revisionsEventPage = repository.findAll(example, pageable);
+        if (revisionsEventPage.getTotalElements() == 0) {
+            return Page.emptyPage();
+        }
 
         List<ProjectChange> changes = revisionsEventPage.get()
                 .map(revisionsEvent -> projectChangeMapper.mapProjectChangeDocumentToProjectChange(revisionsEvent.projectChange()))
                 .toList();
 
-        int pageCount = revisionsEventPage.getTotalPages() == 0 ? 1 : revisionsEventPage.getTotalPages();
-
         //Page number from ui is starting from 1
         //PageRequest from spring-data is starting from 0
-        return Page.create(pageNumber, pageCount, changes, revisionsEventPage.getTotalElements());
+        return Page.create(pageNumber, revisionsEventPage.getTotalPages(), changes, revisionsEventPage.getTotalElements());
     }
 }
