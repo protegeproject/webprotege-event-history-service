@@ -12,17 +12,30 @@ public record UpdateUiHistoryEvent(EventId eventId,
                                    Set<String> affectedEntityIris) implements ProjectEvent {
 
     @JsonCreator
-    public static UpdateUiHistoryEvent create(EventId eventId,
-                                              ProjectId projectId,
-                                              Set<String> afectedEntityIris
+    public static UpdateUiHistoryEvent create(@JsonProperty("eventId") EventId eventId,
+                                              @JsonProperty("projectId") ProjectId projectId,
+                                              @JsonProperty("afectedEntityIris") Set<String> afectedEntityIris
     ) {
         return new UpdateUiHistoryEvent(eventId, projectId, afectedEntityIris);
     }
 
     public static final String CHANNEL = "webprotege.events.projects.uiHistory.UpdateUiHistoryEvent";
 
+    @JsonProperty("projectId")
     public ProjectId projectId() {
         return this.projectId;
+    }
+
+    @Override
+    @JsonProperty("eventId")
+    public EventId eventId() {
+        return eventId;
+    }
+
+    @Override
+    @JsonProperty("afectedEntityIris")
+    public Set<String> affectedEntityIris() {
+        return affectedEntityIris;
     }
 
     @Override
