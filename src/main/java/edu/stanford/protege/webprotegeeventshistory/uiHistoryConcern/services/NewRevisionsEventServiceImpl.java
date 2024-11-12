@@ -3,6 +3,7 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services;
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.Page;
 import edu.stanford.protege.webprotege.common.*;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.repositories.RevisionsEventRepository;
@@ -12,7 +13,9 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.RevisionsEvent.*;
 
@@ -73,5 +76,33 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
         //Page number from ui is starting from 1
         //PageRequest from spring-data is starting from 0
         return Page.create(pageNumber, revisionsEventPage.getTotalPages(), changes, revisionsEventPage.getTotalElements());
+    }
+
+    @Override
+    public ChangedEntities getChangedEntitiesAfterTimestamp(ProjectId projectId, Timestamp timestamp) {
+        List<RevisionsEvent> revisionsEvents = repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime());
+
+        List<String> createdEntities = revisionsEvents.stream()
+                .filter(event -> event.changeType() == ChangeType.CREATE_ENTITY)
+                .map(RevisionsEvent::whoficEntityIri)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<String> updatedEntities = revisionsEvents.stream()
+                .filter(event -> event.changeType() == ChangeType.UPDATE_ENTITY)
+                .map(RevisionsEvent::whoficEntityIri)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<String> deletedEntities = revisionsEvents.stream()
+                .filter(event -> event.changeType() == ChangeType.DELETE_ENTITY)
+                .map(RevisionsEvent::whoficEntityIri)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        return new ChangedEntities(createdEntities, updatedEntities, deletedEntities);
     }
 }
