@@ -8,7 +8,7 @@ import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.repositories.RevisionsEventRepository;
 import org.bson.Document;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,6 +16,7 @@ import org.semanticweb.owlapi.model.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.*;
 
+import java.sql.Timestamp;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,9 +38,19 @@ public class NewRevisionsEventServiceTest {
     @InjectMocks
     private NewRevisionsEventServiceImpl service;
 
+
+    private ProjectId projectId;
+    private Timestamp timestamp;
+
+
+    @BeforeEach
+    public void setUp() {
+        projectId = new ProjectId("testProjectId");
+        timestamp = new Timestamp(System.currentTimeMillis());
+    }
+
     @Test
     public void GIVEN_validNewLinearizationRevisionsEvent_WHEN_registerEventCalled_THEN_revisionsEventsSavedToRepository() {
-        ProjectId projectId = new ProjectId("testProjectId");
         Set<ProjectChangeForEntity> changes = Set.of(mock(ProjectChangeForEntity.class));
         NewRevisionsEvent event = NewRevisionsEvent.create(EventId.generate(), projectId, changes);
 
@@ -55,12 +66,11 @@ public class NewRevisionsEventServiceTest {
 
     @Test
     public void GIVEN_validProjectIdAndSubject_WHEN_fetchPaginatedProjectChangesCalled_THEN_returnPaginatedProjectChanges() {
-        ProjectId projectId = new ProjectId("testProjectId");
         OWLEntity mockEntity = mock(OWLEntity.class);
         IRI mockIri = IRI.create("http://example.com/entity");
         when(mockEntity.getIRI()).thenReturn(mockIri);
 
-        RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, mockIri.toString(), ChangeType.UPDATE_ENTITY,12345L, new Document());
+        RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, mockIri.toString(), ChangeType.UPDATE_ENTITY, 12345L, new Document());
         PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "timestamp"));
         org.springframework.data.domain.Page<RevisionsEvent> mockPage = new PageImpl<>(List.of(mockRevisionsEvent), pageRequest, 1);
 
@@ -81,9 +91,8 @@ public class NewRevisionsEventServiceTest {
 
     @Test
     public void GIVEN_nullSubject_WHEN_fetchPaginatedProjectChangesCalled_THEN_returnPaginatedProjectChanges() {
-        ProjectId projectId = new ProjectId("testProjectId");
 
-        RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, null, ChangeType.CREATE_ENTITY,12345L, new Document());
+        RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, null, ChangeType.CREATE_ENTITY, 12345L, new Document());
         PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "timestamp"));
         org.springframework.data.domain.Page<RevisionsEvent> mockPage = new PageImpl<>(List.of(mockRevisionsEvent), pageRequest, 1);
 
@@ -104,7 +113,6 @@ public class NewRevisionsEventServiceTest {
 
     @Test
     public void GIVEN_noResults_WHEN_fetchPaginatedProjectChangesCalled_THEN_returnEmptyPage() {
-        ProjectId projectId = new ProjectId("testProjectId");
 
         PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "timestamp"));
         org.springframework.data.domain.Page<RevisionsEvent> mockPage = new PageImpl<>(List.of(), pageRequest, 0);
@@ -118,5 +126,61 @@ public class NewRevisionsEventServiceTest {
 
         verify(repository).findAll(any(Example.class), eq(pageRequest));
         verifyNoInteractions(projectChangeMapper);
+    }
+
+    @Test
+    public void GIVEN_noEntitiesChangedAfterTimestamp_WHEN_getChangedEntitiesAfterTimestampCalled_THEN_emptyChangedEntitiesReturned() {
+        when(repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime())).thenReturn(List.of());
+
+        ChangedEntities result = service.getChangedEntitiesAfterTimestamp(projectId, timestamp);
+
+        assertEquals(0, result.createdEntities().size());
+        assertEquals(0, result.updatedEntities().size());
+        assertEquals(0, result.deletedEntities().size());
+
+        verify(repository).findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime());
+    }
+
+    @Test
+    public void GIVEN_entitiesChangedAfterTimestamp_WHEN_getChangedEntitiesAfterTimestampCalled_THEN_returnGroupedChangedEntities() {
+        RevisionsEvent createdEntity = RevisionsEvent.create(projectId, "entityIRI1", ChangeType.CREATE_ENTITY, timestamp.getTime(), new Document());
+        RevisionsEvent updatedEntity = RevisionsEvent.create(projectId, "entityIRI2", ChangeType.UPDATE_ENTITY, timestamp.getTime() + 1000, new Document());
+        RevisionsEvent deletedEntity = RevisionsEvent.create(projectId, "entityIRI3", ChangeType.DELETE_ENTITY, timestamp.getTime() + 2000, new Document());
+
+        when(repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime())).thenReturn(List.of(createdEntity, updatedEntity, deletedEntity));
+
+        ChangedEntities result = service.getChangedEntitiesAfterTimestamp(projectId, timestamp);
+
+        assertEquals(1, result.createdEntities().size());
+        assertEquals("entityIRI1", result.createdEntities().get(0));
+
+        assertEquals(1, result.updatedEntities().size());
+        assertEquals("entityIRI2", result.updatedEntities().get(0));
+
+        assertEquals(1, result.deletedEntities().size());
+        assertEquals("entityIRI3", result.deletedEntities().get(0));
+
+        verify(repository).findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime());
+    }
+
+    @Test
+    public void GIVEN_multipleEntitiesChangedAfterTimestamp_WHEN_getChangedEntitiesAfterTimestampCalled_THEN_returnDeduplicatedChangedEntities() {
+        RevisionsEvent createdEntity1 = RevisionsEvent.create(projectId, "entityIRI1", ChangeType.CREATE_ENTITY, timestamp.getTime(), new Document());
+        RevisionsEvent createdEntity2 = RevisionsEvent.create(projectId, "entityIRI1", ChangeType.CREATE_ENTITY, timestamp.getTime() + 1000, new Document());
+        RevisionsEvent updatedEntity = RevisionsEvent.create(projectId, "entityIRI2", ChangeType.UPDATE_ENTITY, timestamp.getTime() + 2000, new Document());
+
+        when(repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime())).thenReturn(List.of(createdEntity1, createdEntity2, updatedEntity));
+
+        ChangedEntities result = service.getChangedEntitiesAfterTimestamp(projectId, timestamp);
+
+        assertEquals(1, result.createdEntities().size());
+        assertEquals("entityIRI1", result.createdEntities().get(0));
+
+        assertEquals(1, result.updatedEntities().size());
+        assertEquals("entityIRI2", result.updatedEntities().get(0));
+
+        assertEquals(0, result.deletedEntities().size());
+
+        verify(repository).findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime());
     }
 }
