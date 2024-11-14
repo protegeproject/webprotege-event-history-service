@@ -5,6 +5,7 @@ import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotege.revision.RevisionNumber;
 import edu.stanford.protege.webprotegeeventshistory.*;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangeType;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.RevisionsEvent;
 import org.bson.Document;
 import org.junit.jupiter.api.*;
@@ -132,7 +133,7 @@ public class GetProjectChangesForHistoryViewCommandHandlerIntegrationTest {
     private ProjectChange insertMockRevisionsEvent(ProjectId projectId, String whoficEntityIri, long timestamp) {
         ProjectChange projectChange = ProjectChange.get(RevisionNumber.getRevisionNumber(1), UserId.valueOf("user1"), timestamp, "Description1", 0, Page.emptyPage());
         org.bson.Document projectChangeDocument = objectMapper.convertValue(projectChange, Document.class);
-        RevisionsEvent revisionsEvent = RevisionsEvent.create(projectId, whoficEntityIri, timestamp, projectChangeDocument);
+        RevisionsEvent revisionsEvent = RevisionsEvent.create(projectId, whoficEntityIri, ChangeType.UPDATE_ENTITY, timestamp, projectChangeDocument);
         mongoTemplate.save(revisionsEvent);
 
         return projectChange;

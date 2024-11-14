@@ -2,6 +2,7 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.webprotege.change.ProjectChange;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangeType;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
 import org.bson.Document;
 import org.springframework.stereotype.Component;
@@ -23,11 +24,12 @@ public class RevisionEventMapper {
         List<RevisionsEvent> revisionsEvents = newRevisionsEvent.changes().stream()
                 .flatMap(projectChangeForEntity -> {
                     String whoficIri = projectChangeForEntity.whoficEntityIri();
+                    ChangeType changeType = projectChangeForEntity.changeType();
                     ProjectChange projectChange = projectChangeForEntity.projectChange();
                     long timestamp = projectChange.getTimestamp();
                     var projectChangeDocument = objectMapper.convertValue(projectChange, Document.class);
 
-                    return Stream.of(RevisionsEvent.create(newRevisionsEvent.projectId(), whoficIri, timestamp, projectChangeDocument));
+                    return Stream.of(RevisionsEvent.create(newRevisionsEvent.projectId(), whoficIri, changeType, timestamp, projectChangeDocument));
                 })
                 .toList();
 

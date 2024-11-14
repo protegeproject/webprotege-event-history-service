@@ -3,7 +3,6 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services;
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.Page;
 import edu.stanford.protege.webprotege.common.*;
-import edu.stanford.protege.webprotegeeventshistory.config.events.UpdateUiHistoryEvent;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.repositories.RevisionsEventRepository;
@@ -45,6 +44,7 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
         RevisionsEvent probe = new RevisionsEvent(
                 projectId,
                 entityIriSubject,
+                null,
                 0,
                 null
         );
@@ -52,6 +52,7 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
                 .withMatcher(PROJECT_ID, ExampleMatcher.GenericPropertyMatchers.exact())
                 .withIgnorePaths(TIMESTAMP)
                 .withMatcher(WHOFIC_ENTITY_IRI, ExampleMatcher.GenericPropertyMatchers.exact())
+                .withIgnorePaths(CHANGE_TYPE)
                 .withIgnoreNullValues();
 
         Example<RevisionsEvent> example = Example.of(probe, matcher);

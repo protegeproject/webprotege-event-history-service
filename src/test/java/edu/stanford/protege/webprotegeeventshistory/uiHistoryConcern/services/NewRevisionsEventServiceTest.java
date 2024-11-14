@@ -3,7 +3,7 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services;
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.Page;
 import edu.stanford.protege.webprotege.common.*;
-import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ProjectChangeForEntity;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.repositories.RevisionsEventRepository;
@@ -43,7 +43,7 @@ public class NewRevisionsEventServiceTest {
         Set<ProjectChangeForEntity> changes = Set.of(mock(ProjectChangeForEntity.class));
         NewRevisionsEvent event = NewRevisionsEvent.create(EventId.generate(), projectId, changes);
 
-        RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, "whoficEntityIri", 12345L, new Document());
+        RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, "whoficEntityIri", ChangeType.UPDATE_ENTITY, 12345L, new Document());
         when(revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(event))
                 .thenReturn(List.of(mockRevisionsEvent));
 
@@ -60,7 +60,7 @@ public class NewRevisionsEventServiceTest {
         IRI mockIri = IRI.create("http://example.com/entity");
         when(mockEntity.getIRI()).thenReturn(mockIri);
 
-        RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, mockIri.toString(), 12345L, new Document());
+        RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, mockIri.toString(), ChangeType.UPDATE_ENTITY,12345L, new Document());
         PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "timestamp"));
         org.springframework.data.domain.Page<RevisionsEvent> mockPage = new PageImpl<>(List.of(mockRevisionsEvent), pageRequest, 1);
 
@@ -83,7 +83,7 @@ public class NewRevisionsEventServiceTest {
     public void GIVEN_nullSubject_WHEN_fetchPaginatedProjectChangesCalled_THEN_returnPaginatedProjectChanges() {
         ProjectId projectId = new ProjectId("testProjectId");
 
-        RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, null, 12345L, new Document());
+        RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, null, ChangeType.CREATE_ENTITY,12345L, new Document());
         PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "timestamp"));
         org.springframework.data.domain.Page<RevisionsEvent> mockPage = new PageImpl<>(List.of(mockRevisionsEvent), pageRequest, 1);
 
