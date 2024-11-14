@@ -82,27 +82,21 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
     public ChangedEntities getChangedEntitiesAfterTimestamp(ProjectId projectId, Timestamp timestamp) {
         List<RevisionsEvent> revisionsEvents = repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime());
 
-        List<String> createdEntities = revisionsEvents.stream()
-                .filter(event -> event.changeType() == ChangeType.CREATE_ENTITY)
-                .map(RevisionsEvent::whoficEntityIri)
-                .filter(Objects::nonNull)
-                .distinct()
-                .collect(Collectors.toList());
+        List<String> createdEntities = groupByChangeType(revisionsEvents, ChangeType.CREATE_ENTITY);
 
-        List<String> updatedEntities = revisionsEvents.stream()
-                .filter(event -> event.changeType() == ChangeType.UPDATE_ENTITY)
-                .map(RevisionsEvent::whoficEntityIri)
-                .filter(Objects::nonNull)
-                .distinct()
-                .collect(Collectors.toList());
+        List<String> updatedEntities = groupByChangeType(revisionsEvents, ChangeType.UPDATE_ENTITY);
 
-        List<String> deletedEntities = revisionsEvents.stream()
-                .filter(event -> event.changeType() == ChangeType.DELETE_ENTITY)
-                .map(RevisionsEvent::whoficEntityIri)
-                .filter(Objects::nonNull)
-                .distinct()
-                .collect(Collectors.toList());
+        List<String> deletedEntities = groupByChangeType(revisionsEvents, ChangeType.DELETE_ENTITY);
 
         return new ChangedEntities(createdEntities, updatedEntities, deletedEntities);
+    }
+
+    private static List<String> groupByChangeType(List<RevisionsEvent> revisionsEvents, ChangeType createEntity) {
+        return revisionsEvents.stream()
+                .filter(event -> event.changeType() == createEntity)
+                .map(RevisionsEvent::whoficEntityIri)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
     }
 }
