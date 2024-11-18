@@ -3,6 +3,7 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services;
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.Page;
 import edu.stanford.protege.webprotege.common.*;
+import edu.stanford.protege.webprotege.revision.RevisionNumber;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.*;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.*;
 
 import java.sql.Timestamp;
+import java.time.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -182,5 +184,93 @@ public class NewRevisionsEventServiceTest {
         assertEquals(0, result.deletedEntities().size());
 
         verify(repository).findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime());
+    }
+
+    @Test
+    public void GIVEN_noHistoryForEntity_WHEN_getEntityHistorySummaryCalled_THEN_returnEmptyHistorySummary() {
+        String entityIri = "http://example.com/entity1";
+
+        when(repository.findByProjectIdAndWhoficEntityIriOrderByTimestampDesc(projectId, entityIri))
+                .thenReturn(Collections.emptyList());
+
+        EntityHistorySummary result = service.getEntityHistorySummary(projectId, entityIri);
+
+        assertNotNull(result);
+        assertTrue(result.changes().isEmpty());
+
+        verify(repository).findByProjectIdAndWhoficEntityIriOrderByTimestampDesc(projectId, entityIri);
+    }
+
+    @Test
+    public void GIVEN_validHistoryForEntity_WHEN_getEntityHistorySummaryCalled_THEN_returnMappedHistorySummary() {
+        String entityIri = "http://example.com/entity1";
+        long timestamp1 = 1234567890123L;
+        long timestamp2 = 1234567890124L;
+        UserId userId1 = UserId.valueOf("user1");
+        UserId userId2 = UserId.valueOf("user2");
+
+        Document document1 = new Document("a", "b");
+        Document document2 = new Document("c", "d");
+
+        RevisionsEvent eventCreate = RevisionsEvent.create(projectId, entityIri, ChangeType.CREATE_ENTITY, timestamp2, document2);
+        RevisionsEvent eventUpdate = RevisionsEvent.create(projectId, entityIri, ChangeType.UPDATE_ENTITY, timestamp1, document1);
+
+        ProjectChange changeCreate = ProjectChange.get(
+                RevisionNumber.getRevisionNumber(1),
+                userId1,
+                timestamp1,
+                "Create",
+                1,
+                Page.emptyPage()
+        );
+        ProjectChange changeUpdate = ProjectChange.get(
+                RevisionNumber.getRevisionNumber(2),
+                userId2,
+                timestamp2,
+                "Update",
+                1,
+                Page.emptyPage()
+        );
+
+        when(repository.findByProjectIdAndWhoficEntityIriOrderByTimestampDesc(projectId, entityIri))
+                .thenReturn(List.of(eventUpdate, eventCreate));
+        when(projectChangeMapper.mapProjectChangeDocumentToProjectChange(eq(eventCreate.projectChange())))
+                .thenReturn(changeCreate);
+        when(projectChangeMapper.mapProjectChangeDocumentToProjectChange(eq(eventUpdate.projectChange())))
+                .thenReturn(changeUpdate);
+
+        EntityHistorySummary result = service.getEntityHistorySummary(projectId, entityIri);
+
+        assertNotNull(result);
+        assertEquals(2, result.changes().size());
+
+        EntityChange entityUpdate = result.changes().get(0);
+        assertEquals("Update", entityUpdate.changeSummary());
+        assertEquals(userId2, entityUpdate.userId());
+        assertEquals(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp2), ZoneId.of("UTC")), entityUpdate.dateTime());
+
+        EntityChange entityCreate = result.changes().get(1);
+        assertEquals("Create", entityCreate.changeSummary());
+        assertEquals(userId1, entityCreate.userId());
+        assertEquals(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp1), ZoneId.of("UTC")), entityCreate.dateTime());
+
+        verify(repository).findByProjectIdAndWhoficEntityIriOrderByTimestampDesc(projectId, entityIri);
+        verify(projectChangeMapper).mapProjectChangeDocumentToProjectChange(eventCreate.projectChange());
+        verify(projectChangeMapper).mapProjectChangeDocumentToProjectChange(eventUpdate.projectChange());
+    }
+
+    @Test
+    public void GIVEN_emptyHistory_WHEN_getEntityHistorySummaryCalled_THEN_returnEmptySummary() {
+        String entityIri = "http://example.com/entity2";
+
+        when(repository.findByProjectIdAndWhoficEntityIriOrderByTimestampDesc(projectId, entityIri))
+                .thenReturn(Collections.emptyList());
+
+        EntityHistorySummary result = service.getEntityHistorySummary(projectId, entityIri);
+
+        assertNotNull(result);
+        assertTrue(result.changes().isEmpty());
+
+        verify(repository).findByProjectIdAndWhoficEntityIriOrderByTimestampDesc(projectId, entityIri);
     }
 }
