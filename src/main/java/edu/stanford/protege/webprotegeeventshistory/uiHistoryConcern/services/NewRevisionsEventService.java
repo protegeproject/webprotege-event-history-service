@@ -2,7 +2,7 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services;
 
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.*;
-import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangedEntities;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.NewRevisionsEvent;
 import org.semanticweb.owlapi.model.OWLEntity;
 
@@ -16,4 +16,6 @@ public interface NewRevisionsEventService {
     Page<ProjectChange> fetchPaginatedProjectChanges(ProjectId projectId, Optional<OWLEntity> subject, int pageNumber, int pageSize);
 
     ChangedEntities getChangedEntitiesAfterTimestamp(ProjectId projectId, Timestamp timestamp);
+
+    EntityHistorySummary getEntityHistorySummary(ProjectId projectId, String entityIri);
 }
