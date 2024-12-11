@@ -50,7 +50,7 @@ public class NewRevisionsEventHandlerIntegrationTest {
         changes.add(ProjectChangeForEntity.create("whoficEntityIri1", projectChange1));
         changes.add(ProjectChangeForEntity.create("whoficEntityIri2", projectChange2));
 
-        NewRevisionsEvent newLinRevEvent = NewRevisionsEvent.create(EventId.generate(), projectId, changes);
+        NewRevisionsEvent newLinRevEvent = NewRevisionsEvent.create(EventId.generate(), projectId, changes, ChangeRequestId.generate());
 
         handler.handleEvent(newLinRevEvent);
 
@@ -73,7 +73,7 @@ public class NewRevisionsEventHandlerIntegrationTest {
         ProjectId projectId = ProjectId.generate();
         Set<ProjectChangeForEntity> emptyChanges = new LinkedHashSet<>();
 
-        NewRevisionsEvent emptyEvent = NewRevisionsEvent.create(EventId.generate(), projectId, emptyChanges);
+        NewRevisionsEvent emptyEvent = NewRevisionsEvent.create(EventId.generate(), projectId, emptyChanges, ChangeRequestId.generate());
 
         handler.handleEvent(emptyEvent);
 
@@ -106,8 +106,8 @@ public class NewRevisionsEventHandlerIntegrationTest {
 
         changesForSecondEvent.add(ProjectChangeForEntity.create("whoficEntityIri3", projectChange3));
 
-        NewRevisionsEvent firstEvent = NewRevisionsEvent.create(EventId.generate(), projectId1, changesForFirstEvent);
-        NewRevisionsEvent secondEvent = NewRevisionsEvent.create(EventId.generate(), projectId2, changesForSecondEvent);
+        NewRevisionsEvent firstEvent = NewRevisionsEvent.create(EventId.generate(), projectId1, changesForFirstEvent, ChangeRequestId.generate());
+        NewRevisionsEvent secondEvent = NewRevisionsEvent.create(EventId.generate(), projectId2, changesForSecondEvent, ChangeRequestId.generate());
 
         handler.handleEvent(firstEvent);
         handler.handleEvent(secondEvent);

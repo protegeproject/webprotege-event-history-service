@@ -50,6 +50,7 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
                 entityIriSubject,
                 null,
                 0,
+                null,
                 null
         );
         ExampleMatcher matcher = ExampleMatcher.matching()

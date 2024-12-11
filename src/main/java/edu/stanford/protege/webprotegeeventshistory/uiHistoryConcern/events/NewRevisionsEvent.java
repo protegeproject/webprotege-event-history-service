@@ -13,15 +13,17 @@ import static edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.even
 public record NewRevisionsEvent(
         EventId eventId,
         ProjectId projectId,
-        Set<ProjectChangeForEntity> changes
+        Set<ProjectChangeForEntity> changes,
+        ChangeRequestId changeRequestId
 ) implements ProjectEvent {
     public final static String CHANNEL = "webprotege.events.projects.uiHistory.NewRevisionsEvent";
 
     @JsonCreator
     public static NewRevisionsEvent create(@JsonProperty("eventId") EventId eventId,
                                            @JsonProperty("projectId") ProjectId projectId,
-                                           @JsonProperty("changes") Set<ProjectChangeForEntity> changes) {
-        return new NewRevisionsEvent(eventId, projectId, changes);
+                                           @JsonProperty("changes") Set<ProjectChangeForEntity> changes,
+                                           @JsonProperty("changeRequestId") ChangeRequestId changeRequestId) {
+        return new NewRevisionsEvent(eventId, projectId, changes, changeRequestId);
     }
 
     @Override
