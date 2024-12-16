@@ -44,7 +44,7 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
     @Override
     public Page<ProjectChange> fetchPaginatedProjectChanges(ProjectId projectId, Optional<OWLEntity> subject, int pageNumber, int pageSize) {
         String entityIriSubject = subject.map(sub -> sub.getIRI().toString()).orElse(null);
-        RevisionsEvent probe = new RevisionsEvent(
+        RevisionsEvent probe = RevisionsEvent.create(
                 projectId,
                 entityIriSubject,
                 null,

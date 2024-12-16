@@ -4,11 +4,11 @@ import com.google.common.base.Objects;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangeType;
 import org.springframework.data.mongodb.core.index.*;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.*;
 
 @Document(collection = "RevisionsEvents")
 public record RevisionsEvent(
-        ProjectId projectId,
+        @Field("projectId") String projectId,
         String whoficEntityIri,
         ChangeType changeType,
         @Indexed(name = "timestamp", direction = IndexDirection.DESCENDING) long timestamp,
@@ -26,7 +26,7 @@ public record RevisionsEvent(
                                         ChangeType changeType,
                                         long timestamp,
                                         org.bson.Document projectChange) {
-        return new RevisionsEvent(projectId, whoficEntityIri, changeType, timestamp, projectChange);
+        return new RevisionsEvent(projectId.id(), whoficEntityIri, changeType, timestamp, projectChange);
     }
 
     @Override

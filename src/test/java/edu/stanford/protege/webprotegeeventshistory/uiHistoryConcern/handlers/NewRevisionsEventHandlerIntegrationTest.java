@@ -59,12 +59,12 @@ public class NewRevisionsEventHandlerIntegrationTest {
 
         RevisionsEvent firstEvent = savedEvents.get(0);
         assertEquals("whoficEntityIri1", firstEvent.whoficEntityIri());
-        assertEquals(projectId, firstEvent.projectId());
+        assertEquals(projectId.id(), firstEvent.projectId());
         assertEquals(12345L, firstEvent.timestamp());
 
         RevisionsEvent secondEvent = savedEvents.get(1);
         assertEquals("whoficEntityIri2", secondEvent.whoficEntityIri());
-        assertEquals(projectId, secondEvent.projectId());
+        assertEquals(projectId.id(), secondEvent.projectId());
         assertEquals(12346L, secondEvent.timestamp());
     }
 
@@ -117,10 +117,10 @@ public class NewRevisionsEventHandlerIntegrationTest {
 
         RevisionsEvent firstSavedEvent = savedEvents.get(0);
         assertEquals("whoficEntityIri1", firstSavedEvent.whoficEntityIri());
-        assertEquals(projectId1, firstSavedEvent.projectId());
+        assertEquals(projectId1.id(), firstSavedEvent.projectId());
 
         RevisionsEvent thirdSavedEvent = savedEvents.get(2);
         assertEquals("whoficEntityIri3", thirdSavedEvent.whoficEntityIri());
-        assertEquals(projectId2, thirdSavedEvent.projectId());
+        assertEquals(projectId2.id(), thirdSavedEvent.projectId());
     }
 }
