@@ -19,7 +19,7 @@ public class MongoConfiguration extends AbstractMongoClientConfiguration {
     @Value("${spring.data.mongodb.database}")
     private String databaseName;
 
-    @Value("${spring.data.mongodb.uri:mongodb://localhost:27017}")
+    @Value("${spring.data.mongodb.uri}")
     private String mongoUri;
 
     @Nonnull

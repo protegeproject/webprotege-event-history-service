@@ -40,12 +40,14 @@ public abstract class IntegrationTest {
     private static void setUpMongo(){
         var imageName = DockerImageName.parse("mongo");
         mongoDBContainer = new MongoDBContainer(imageName)
-                .withExposedPorts(27017, 27017);
+                .withExposedPorts(27017);
         mongoDBContainer.start();
 
-        var mappedHttpPort = mongoDBContainer.getMappedPort(27017);
-        LOGGER.info("MongoDB port 27017 is mapped to {}", mappedHttpPort);
-        System.setProperty("spring.data.mongodb.port", Integer.toString(mappedHttpPort));
+        var mappedPort = mongoDBContainer.getMappedPort(27017);
+        var mongoUri = String.format("mongodb://localhost:%d", mappedPort);
+
+        System.setProperty("spring.data.mongodb.uri", mongoUri);
+        System.setProperty("spring.data.mongodb.port", Integer.toString(mappedPort));
     }
 
     private static void setUpRabbitMq(){
