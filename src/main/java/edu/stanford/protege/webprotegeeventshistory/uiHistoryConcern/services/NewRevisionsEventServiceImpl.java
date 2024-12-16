@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -98,5 +99,21 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public EntityHistorySummary getEntityHistorySummary(ProjectId projectId, String entityIri) {
+        List<RevisionsEvent> revisionsForEntity = repository.findByProjectIdAndWhoficEntityIriOrderByTimestampDesc(projectId, entityIri);
+        List<EntityChange> entityChanges = revisionsForEntity.stream()
+                .map(revisionEvent -> {
+                            ProjectChange projectChange = projectChangeMapper.mapProjectChangeDocumentToProjectChange(revisionEvent.projectChange());
+                            Instant instant = Instant.ofEpochMilli(projectChange.getTimestamp());
+                            LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.of("UTC"));
+                            return EntityChange.create(projectChange.getSummary(), projectChange.getAuthor(), localDateTime);
+                        }
+                ).toList();
+
+
+        return EntityHistorySummary.create(entityChanges);
     }
 }

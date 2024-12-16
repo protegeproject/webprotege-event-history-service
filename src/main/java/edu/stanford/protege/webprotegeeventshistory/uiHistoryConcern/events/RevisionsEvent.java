@@ -8,7 +8,9 @@ import org.springframework.data.mongodb.core.mapping.*;
 
 @Document(collection = "RevisionsEvents")
 public record RevisionsEvent(
+        @Indexed(name = "revisionEventProjectId")
         @Field("projectId") String projectId,
+        @Indexed(name = "revisionEventEntityIri")
         String whoficEntityIri,
         ChangeType changeType,
         @Indexed(name = "timestamp", direction = IndexDirection.DESCENDING) long timestamp,
