@@ -1,5 +1,6 @@
 package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.handlers;
 
+import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotegeeventshistory.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.*;
@@ -68,8 +69,8 @@ public class GetChangedEntitiesCommandHandlerIT {
                 entityIri,
                 changeType,
                 timestamp,
-                new Document()
-        );
+                new Document(),
+                ChangeRequestId.generate());
         mongoTemplate.save(revisionsEvent);
     }
 }

@@ -135,7 +135,7 @@ public class GetProjectChangesForHistoryViewCommandHandlerIntegrationTest {
     private ProjectChange insertMockRevisionsEvent(ProjectId projectId, String whoficEntityIri, long timestamp) {
         ProjectChange projectChange = ProjectChange.get(RevisionNumber.getRevisionNumber(1), UserId.valueOf("user1"), timestamp, "Description1", 0, Page.emptyPage());
         org.bson.Document projectChangeDocument = objectMapper.convertValue(projectChange, Document.class);
-        RevisionsEvent revisionsEvent = RevisionsEvent.create(projectId, whoficEntityIri, ChangeType.UPDATE_ENTITY, timestamp, projectChangeDocument);
+        RevisionsEvent revisionsEvent = RevisionsEvent.create(projectId, whoficEntityIri, ChangeType.UPDATE_ENTITY, timestamp, projectChangeDocument, ChangeRequestId.generate());
         mongoTemplate.save(revisionsEvent);
 
         return projectChange;

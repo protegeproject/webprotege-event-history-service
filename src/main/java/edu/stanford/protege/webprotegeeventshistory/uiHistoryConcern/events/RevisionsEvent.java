@@ -1,6 +1,7 @@
 package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events;
 
 import com.google.common.base.Objects;
+import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangeType;
 import org.springframework.data.mongodb.core.index.*;
@@ -14,6 +15,8 @@ public record RevisionsEvent(
         String whoficEntityIri,
         ChangeType changeType,
         @Indexed(name = "timestamp", direction = IndexDirection.DESCENDING) long timestamp,
+
+        String changeRequestId,
         org.bson.Document projectChange
 ) {
 
@@ -27,8 +30,9 @@ public record RevisionsEvent(
                                         String whoficEntityIri,
                                         ChangeType changeType,
                                         long timestamp,
-                                        org.bson.Document projectChange) {
-        return new RevisionsEvent(projectId.id(), whoficEntityIri, changeType, timestamp, projectChange);
+                                        org.bson.Document projectChange,
+                                        ChangeRequestId changeRequestId) {
+        return new RevisionsEvent(projectId.id(), whoficEntityIri, changeType, timestamp, changeRequestId != null ? changeRequestId.id() : null, projectChange);
     }
 
     @Override

@@ -39,7 +39,7 @@ public class RevisionEventMapperTest {
         Document mockDocument = new Document();
         when(objectMapper.convertValue(mockProjectChange, Document.class)).thenReturn(mockDocument);
 
-        List<RevisionsEvent> result = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, changes));
+        List<RevisionsEvent> result = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, changes, ChangeRequestId.generate()));
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -63,7 +63,7 @@ public class RevisionEventMapperTest {
         ProjectId projectId = new ProjectId("testProjectId");
         Set<ProjectChangeForEntity> emptyChanges = Set.of();
 
-        List<RevisionsEvent> result = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, emptyChanges));
+        List<RevisionsEvent> result = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, emptyChanges, ChangeRequestId.generate()));
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -75,7 +75,7 @@ public class RevisionEventMapperTest {
         ProjectId projectId = new ProjectId("testProjectId");
         Set<ProjectChangeForEntity> nullChanges = null;
 
-        assertThrows(NullPointerException.class, () -> revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, nullChanges)));
+        assertThrows(NullPointerException.class, () -> revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, nullChanges, ChangeRequestId.generate())));
 
         verifyNoInteractions(objectMapper);
     }

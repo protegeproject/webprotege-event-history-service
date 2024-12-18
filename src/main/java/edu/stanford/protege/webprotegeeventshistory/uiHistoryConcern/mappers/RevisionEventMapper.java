@@ -21,7 +21,7 @@ public class RevisionEventMapper {
 
     public List<RevisionsEvent> mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent newRevisionsEvent) {
 
-        List<RevisionsEvent> revisionsEvents = newRevisionsEvent.changes().stream()
+        return newRevisionsEvent.changes().stream()
                 .flatMap(projectChangeForEntity -> {
                     String whoficIri = projectChangeForEntity.whoficEntityIri();
                     ChangeType changeType = projectChangeForEntity.changeType();
@@ -29,10 +29,8 @@ public class RevisionEventMapper {
                     long timestamp = projectChange.getTimestamp();
                     var projectChangeDocument = objectMapper.convertValue(projectChange, Document.class);
 
-                    return Stream.of(RevisionsEvent.create(newRevisionsEvent.projectId(), whoficIri, changeType, timestamp, projectChangeDocument));
+                    return Stream.of(RevisionsEvent.create(newRevisionsEvent.projectId(), whoficIri, changeType, timestamp, projectChangeDocument, newRevisionsEvent.changeRequestId()));
                 })
                 .toList();
-
-        return revisionsEvents;
     }
 }
