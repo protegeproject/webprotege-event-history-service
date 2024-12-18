@@ -8,22 +8,27 @@ import org.testcontainers.utility.DockerImageName;
 
 public class MongoTestExtension implements BeforeAllCallback, AfterAllCallback {
 
-    private  static MongoDBContainer mongoDBContainer;
+    private static MongoDBContainer mongoDBContainer;
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) {
         var imageName = DockerImageName.parse("mongo");
         mongoDBContainer = new MongoDBContainer(imageName)
-                .withExposedPorts(27017, 27017);
+                .withExposedPorts(27017);
         mongoDBContainer.start();
 
-        var mappedHttpPort = mongoDBContainer.getMappedPort(27017);
-        System.setProperty("spring.data.mongodb.port", Integer.toString(mappedHttpPort));
+        var mappedPort = mongoDBContainer.getMappedPort(27017);
+        var mongoUri = String.format("mongodb://localhost:%d", mappedPort);
 
+        System.setProperty("spring.data.mongodb.uri", mongoUri);
+        System.setProperty("spring.data.mongodb.port", Integer.toString(mappedPort));
     }
 
     @Override
     public void afterAll(ExtensionContext extensionContext) {
-        mongoDBContainer.stop();
+        if (mongoDBContainer != null) {
+            mongoDBContainer.stop();
+        }
     }
 }
+

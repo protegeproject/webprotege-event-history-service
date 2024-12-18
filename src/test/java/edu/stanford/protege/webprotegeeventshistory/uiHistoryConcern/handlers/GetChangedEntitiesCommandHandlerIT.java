@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({SpringExtension.class, RabbitTestExtension.class, MongoTestExtension.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @Import({WebprotegeEventsHistoryApplication.class})
+@ActiveProfiles("test")
 public class GetChangedEntitiesCommandHandlerIT {
 
     @Autowired
