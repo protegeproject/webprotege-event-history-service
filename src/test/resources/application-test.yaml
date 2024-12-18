@@ -1,8 +1,8 @@
 spring:
   application:
-    name: webprotege-linearization-service
+    name: EventsHistory
   rabbitmq:
-    host: rabbitmq
+    host: localhost
     port: 5672
     password: guest
     username: guest
@@ -13,3 +13,11 @@ spring:
       database: webprotege
       auto-index-creation: true
       uri: mongodb://${spring.data.mongodb.host}:${spring.data.mongodb.port}/webprotege
+
+webprotege:
+  rabbitmq:
+    requestqueue: webprotege-events-history-queue
+    responsequeue: webprotege-events-history-response
+    eventsqueue: webprotege-events-history-event-queue
+    timeout: 60000
+    event-subscribe: true

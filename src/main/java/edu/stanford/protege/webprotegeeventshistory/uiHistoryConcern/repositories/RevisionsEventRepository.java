@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.repository.*;
 import java.util.List;
 
 public interface RevisionsEventRepository extends MongoRepository<RevisionsEvent, String> {
-    @Query("{ 'projectId.id': ?0, 'timestamp': { $gt: ?1 } }")
+    @Query("{ 'projectId': ?0, 'timestamp': { $gt: ?1 } }")
     List<RevisionsEvent> findByProjectIdAndTimestampAfter(String projectId, long timestamp);
 
     List<RevisionsEvent> findByProjectIdAndWhoficEntityIriOrderByTimestampDesc(ProjectId projectId, String whoficEntityIri);
