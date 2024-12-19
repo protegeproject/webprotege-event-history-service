@@ -13,7 +13,6 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -81,8 +80,8 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
     }
 
     @Override
-    public ChangedEntities getChangedEntitiesAfterTimestamp(ProjectId projectId, Timestamp timestamp) {
-        List<RevisionsEvent> revisionsEvents = repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime());
+    public ChangedEntities getChangedEntitiesAfterTimestamp(ProjectId projectId, long timestamp) {
+        List<RevisionsEvent> revisionsEvents = repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp);
 
         List<String> createdEntities = groupByChangeType(revisionsEvents, ChangeType.CREATE_ENTITY);
 

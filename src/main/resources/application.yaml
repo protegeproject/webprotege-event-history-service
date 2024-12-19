@@ -1,7 +1,10 @@
 server:
   port: 7761
 
-logging.level.root: DEBUG
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.mongodb.driver: DEBUG
 
 spring:
   application:
