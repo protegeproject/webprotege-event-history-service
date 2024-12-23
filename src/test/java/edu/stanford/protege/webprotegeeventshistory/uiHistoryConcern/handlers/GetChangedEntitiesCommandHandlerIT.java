@@ -48,7 +48,7 @@ public class GetChangedEntitiesCommandHandlerIT {
         insertMockRevisionsEvent(projectId, "entity2", timestamp.getTime() + 5000, ChangeType.UPDATE_ENTITY);
         insertMockRevisionsEvent(projectId, "entity3", timestamp.getTime() + 6000, ChangeType.DELETE_ENTITY);
 
-        GetChangedEntitiesRequest request = GetChangedEntitiesRequest.create(projectId, timestamp);
+        GetChangedEntitiesRequest request = GetChangedEntitiesRequest.create(projectId, timestamp.getTime());
 
         Mono<GetChangedEntitiesResponse> responseMono = commandHandler.handleRequest(request, null);
         GetChangedEntitiesResponse response = responseMono.block();

@@ -134,7 +134,7 @@ public class NewRevisionsEventServiceTest {
     public void GIVEN_noEntitiesChangedAfterTimestamp_WHEN_getChangedEntitiesAfterTimestampCalled_THEN_emptyChangedEntitiesReturned() {
         when(repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime())).thenReturn(List.of());
 
-        ChangedEntities result = service.getChangedEntitiesAfterTimestamp(projectId, timestamp);
+        ChangedEntities result = service.getChangedEntitiesAfterTimestamp(projectId, timestamp.getTime());
 
         assertEquals(0, result.createdEntities().size());
         assertEquals(0, result.updatedEntities().size());
@@ -151,7 +151,7 @@ public class NewRevisionsEventServiceTest {
 
         when(repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime())).thenReturn(List.of(createdEntity, updatedEntity, deletedEntity));
 
-        ChangedEntities result = service.getChangedEntitiesAfterTimestamp(projectId, timestamp);
+        ChangedEntities result = service.getChangedEntitiesAfterTimestamp(projectId, timestamp.getTime());
 
         assertEquals(1, result.createdEntities().size());
         assertEquals("entityIRI1", result.createdEntities().get(0));
@@ -173,7 +173,7 @@ public class NewRevisionsEventServiceTest {
 
         when(repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp.getTime())).thenReturn(List.of(createdEntity1, createdEntity2, updatedEntity));
 
-        ChangedEntities result = service.getChangedEntitiesAfterTimestamp(projectId, timestamp);
+        ChangedEntities result = service.getChangedEntitiesAfterTimestamp(projectId, timestamp.getTime());
 
         assertEquals(1, result.createdEntities().size());
         assertEquals("entityIRI1", result.createdEntities().get(0));
