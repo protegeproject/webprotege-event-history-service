@@ -2,19 +2,27 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services;
 
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.Page;
-import edu.stanford.protege.webprotege.common.*;
-import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.*;
-import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
-import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.*;
+import edu.stanford.protege.webprotege.common.ProjectId;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangeType;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangedEntities;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.EntityChange;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.EntityHistorySummary;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.NewRevisionsEvent;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.RevisionsEvent;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.ProjectChangeMapper;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.RevisionEventMapper;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.repositories.RevisionsEventRepository;
 import org.semanticweb.owlapi.model.OWLEntity;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
-import java.util.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.RevisionsEvent.*;
@@ -92,9 +100,9 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
         return new ChangedEntities(createdEntities, updatedEntities, deletedEntities);
     }
 
-    private static List<String> groupByChangeType(List<RevisionsEvent> revisionsEvents, ChangeType createEntity) {
+    private static List<String> groupByChangeType(List<RevisionsEvent> revisionsEvents, ChangeType changeType) {
         return revisionsEvents.stream()
-                .filter(event -> event.changeType() == createEntity)
+                .filter(event -> event.changeType() == changeType)
                 .map(RevisionsEvent::whoficEntityIri)
                 .filter(Objects::nonNull)
                 .distinct()
@@ -114,6 +122,6 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
                 ).toList();
 
 
-        return EntityHistorySummary.create(entityChanges);
+        return EntityHistorySummary.create(entityIri, projectId.value(), entityChanges);
     }
 }
