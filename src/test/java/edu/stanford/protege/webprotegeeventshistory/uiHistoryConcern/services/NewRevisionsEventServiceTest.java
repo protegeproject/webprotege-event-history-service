@@ -247,12 +247,12 @@ public class NewRevisionsEventServiceTest {
         EntityChange entityUpdate = result.changes().get(0);
         assertEquals("Update", entityUpdate.changeSummary());
         assertEquals(userId2, entityUpdate.userId());
-        assertEquals(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp2), ZoneId.of("UTC")), entityUpdate.dateTime());
+        assertEquals(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp2), ZoneId.of("UTC")), entityUpdate.timestamp());
 
         EntityChange entityCreate = result.changes().get(1);
         assertEquals("Create", entityCreate.changeSummary());
         assertEquals(userId1, entityCreate.userId());
-        assertEquals(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp1), ZoneId.of("UTC")), entityCreate.dateTime());
+        assertEquals(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp1), ZoneId.of("UTC")), entityCreate.timestamp());
 
         verify(repository).findByProjectIdAndWhoficEntityIriOrderByTimestampDesc(projectId, entityIri);
         verify(projectChangeMapper).mapProjectChangeDocumentToProjectChange(eventCreate.projectChange());
