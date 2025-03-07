@@ -3,6 +3,7 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services;
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.Page;
 import edu.stanford.protege.webprotege.common.ProjectId;
+import edu.stanford.protege.webprotegeeventshistory.HighLevelBusinessEventsService;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangeType;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangedEntities;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.EntityChange;
@@ -13,10 +14,13 @@ import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.Pro
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.RevisionEventMapper;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.repositories.RevisionsEventRepository;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -31,6 +35,8 @@ import static edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.even
 @Transactional
 public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(HighLevelBusinessEventsService.class);
+
     private final RevisionsEventRepository repository;
     private final RevisionEventMapper revisionEventMapper;
     private final ProjectChangeMapper projectChangeMapper;
@@ -44,9 +50,15 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
 
     @Override
     public void registerEvent(NewRevisionsEvent newRevEvent) {
-        List<RevisionsEvent> revisionsEvents = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(newRevEvent);
+        try{
+            List<RevisionsEvent> revisionsEvents = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(newRevEvent);
 
-        repository.saveAll(revisionsEvents);
+            repository.saveAll(revisionsEvents);
+        }catch (Exception e){
+            LOGGER.error(MessageFormat.format("An error occurred when trying to save events: {0}", newRevEvent.toString()), e);
+            throw e;
+        }
+
     }
 
     @Override
