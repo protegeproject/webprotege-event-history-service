@@ -3,7 +3,6 @@ package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services;
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.Page;
 import edu.stanford.protege.webprotege.common.ProjectId;
-import edu.stanford.protege.webprotegeeventshistory.HighLevelBusinessEventsService;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangeType;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangedEntities;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.EntityChange;
@@ -35,7 +34,7 @@ import static edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.even
 @Transactional
 public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(HighLevelBusinessEventsService.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(NewRevisionsEventServiceImpl.class);
 
     private final RevisionsEventRepository repository;
     private final RevisionEventMapper revisionEventMapper;
