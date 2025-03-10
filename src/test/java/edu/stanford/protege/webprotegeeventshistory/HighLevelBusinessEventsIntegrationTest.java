@@ -63,7 +63,7 @@ public class HighLevelBusinessEventsIntegrationTest extends IntegrationTest {
                 new OWLClassImpl(IRI.create("http://www.example.org/R9UuCy8Vzvft2f4fc67VwGs")),
                 new ArrayList<>());
         var packagedProjectChangeEvent = new PackagedProjectChangeEvent(projectId, EventId.generate(), Arrays.asList(entityTagsChangedEvent));
-        RabbitMQEventDispatcher dispatcher = new RabbitMQEventDispatcher(objectMapper, eventRabbitTemplate);
+        RabbitMQEventDispatcher dispatcher = new RabbitMQEventDispatcher("webprotege-event-history", objectMapper, eventRabbitTemplate);
         dispatcher.dispatchEvent(packagedProjectChangeEvent);
 
         Thread.sleep(5000);
