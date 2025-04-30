@@ -1,10 +1,9 @@
 package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events;
 
 import com.fasterxml.jackson.annotation.*;
+import com.google.common.collect.ImmutableList;
 import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ProjectChangeForEntity;
-
-import java.util.Set;
 
 import static edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.NewRevisionsEvent.CHANNEL;
 
@@ -13,7 +12,7 @@ import static edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.even
 public record NewRevisionsEvent(
         EventId eventId,
         ProjectId projectId,
-        Set<ProjectChangeForEntity> changes,
+        ImmutableList<ProjectChangeForEntity> changes,
         ChangeRequestId changeRequestId
 ) implements ProjectEvent {
     public final static String CHANNEL = "webprotege.events.projects.uiHistory.NewRevisionsEvent";
@@ -21,7 +20,7 @@ public record NewRevisionsEvent(
     @JsonCreator
     public static NewRevisionsEvent create(@JsonProperty("eventId") EventId eventId,
                                            @JsonProperty("projectId") ProjectId projectId,
-                                           @JsonProperty("changes") Set<ProjectChangeForEntity> changes,
+                                           @JsonProperty("changes") ImmutableList<ProjectChangeForEntity> changes,
                                            @JsonProperty("changeRequestId") ChangeRequestId changeRequestId) {
         return new NewRevisionsEvent(eventId, projectId, changes, changeRequestId);
     }
@@ -39,7 +38,7 @@ public record NewRevisionsEvent(
     }
 
     @JsonProperty("changes")
-    public Set<ProjectChangeForEntity> changes() {
+    public ImmutableList<ProjectChangeForEntity> changes() {
         return changes;
     }
 

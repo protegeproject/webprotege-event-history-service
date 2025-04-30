@@ -1,5 +1,6 @@
 package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.services;
 
+import com.google.common.collect.ImmutableList;
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.Page;
 import edu.stanford.protege.webprotege.common.*;
@@ -53,7 +54,7 @@ public class NewRevisionsEventServiceTest {
 
     @Test
     public void GIVEN_validNewLinearizationRevisionsEvent_WHEN_registerEventCalled_THEN_revisionsEventsSavedToRepository() {
-        Set<ProjectChangeForEntity> changes = Set.of(mock(ProjectChangeForEntity.class));
+        ImmutableList<ProjectChangeForEntity> changes = ImmutableList.of(mock(ProjectChangeForEntity.class));
         NewRevisionsEvent event = NewRevisionsEvent.create(EventId.generate(), projectId, changes, ChangeRequestId.generate());
 
         RevisionsEvent mockRevisionsEvent = RevisionsEvent.create(projectId, "whoficEntityIri", ChangeType.UPDATE_ENTITY, 12345L, new Document(), ChangeRequestId.generate());

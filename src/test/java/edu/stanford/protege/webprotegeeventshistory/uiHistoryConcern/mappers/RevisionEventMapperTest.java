@@ -1,6 +1,7 @@
 package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ProjectChangeForEntity;
@@ -30,7 +31,7 @@ public class RevisionEventMapperTest {
         ProjectChange mockProjectChange = mock(ProjectChange.class);
         ProjectChangeForEntity change1 = ProjectChangeForEntity.create("whoficEntityIri1", mockProjectChange);
         ProjectChangeForEntity change2 = ProjectChangeForEntity.create("whoficEntityIri2", mockProjectChange);
-        Set<ProjectChangeForEntity> changes = new LinkedHashSet<>();
+        List<ProjectChangeForEntity> changes = new LinkedList<>();
         changes.add(change1);
         changes.add(change2);
 
@@ -39,7 +40,7 @@ public class RevisionEventMapperTest {
         Document mockDocument = new Document();
         when(objectMapper.convertValue(mockProjectChange, Document.class)).thenReturn(mockDocument);
 
-        List<RevisionsEvent> result = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, changes, ChangeRequestId.generate()));
+        List<RevisionsEvent> result = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, ImmutableList.copyOf(changes), ChangeRequestId.generate()));
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -61,9 +62,8 @@ public class RevisionEventMapperTest {
     @Test
     public void GIVEN_emptyChangesSet_WHEN_mapNewLinearizationRevisionsEventToRevisionsEvents_THEN_returnEmptyList() {
         ProjectId projectId = new ProjectId("testProjectId");
-        Set<ProjectChangeForEntity> emptyChanges = Set.of();
 
-        List<RevisionsEvent> result = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, emptyChanges, ChangeRequestId.generate()));
+        List<RevisionsEvent> result = revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, ImmutableList.of(), ChangeRequestId.generate()));
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -73,9 +73,8 @@ public class RevisionEventMapperTest {
     @Test
     public void GIVEN_nullChangesSet_WHEN_mapNewLinearizationRevisionsEventToRevisionsEvents_THEN_returnEmptyList() {
         ProjectId projectId = new ProjectId("testProjectId");
-        Set<ProjectChangeForEntity> nullChanges = null;
 
-        assertThrows(NullPointerException.class, () -> revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, nullChanges, ChangeRequestId.generate())));
+        assertThrows(NullPointerException.class, () -> revisionEventMapper.mapNewRevisionsEventToRevisionsEvents(NewRevisionsEvent.create(EventId.generate(), projectId, null, ChangeRequestId.generate())));
 
         verifyNoInteractions(objectMapper);
     }
