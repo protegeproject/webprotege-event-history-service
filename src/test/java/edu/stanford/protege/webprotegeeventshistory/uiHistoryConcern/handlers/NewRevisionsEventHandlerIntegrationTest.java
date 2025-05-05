@@ -1,5 +1,6 @@
 package edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.handlers;
 
+import com.google.common.collect.ImmutableList;
 import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotege.diff.DiffElement;
@@ -42,7 +43,7 @@ public class NewRevisionsEventHandlerIntegrationTest {
     @Test
     public void GIVEN_validNewLinearizationRevisionsEvent_WHEN_handleEventCalled_THEN_eventIsRegisteredInDatabase() {
         ProjectId projectId = ProjectId.generate();
-        Set<ProjectChangeForEntity> changes = new LinkedHashSet<>();
+        List<ProjectChangeForEntity> changes = new LinkedList<>();
         Page<DiffElement<String, String>> emptyPage = Page.emptyPage();
         ProjectChange projectChange1 = ProjectChange.get(RevisionNumber.getRevisionNumber(1), UserId.valueOf("user1"), 12345L, "Description1", 0, emptyPage);
         ProjectChange projectChange2 = ProjectChange.get(RevisionNumber.getRevisionNumber(2), UserId.valueOf("user2"), 12346L, "Description2", 0, emptyPage);
@@ -50,7 +51,7 @@ public class NewRevisionsEventHandlerIntegrationTest {
         changes.add(ProjectChangeForEntity.create("whoficEntityIri1", projectChange1));
         changes.add(ProjectChangeForEntity.create("whoficEntityIri2", projectChange2));
 
-        NewRevisionsEvent newLinRevEvent = NewRevisionsEvent.create(EventId.generate(), projectId, changes, ChangeRequestId.generate());
+        NewRevisionsEvent newLinRevEvent = NewRevisionsEvent.create(EventId.generate(), projectId, ImmutableList.copyOf(changes), ChangeRequestId.generate());
 
         handler.handleEvent(newLinRevEvent);
 
@@ -71,9 +72,8 @@ public class NewRevisionsEventHandlerIntegrationTest {
     @Test
     public void GIVEN_emptyChanges_WHEN_handleEventCalled_THEN_noEventsAreSavedToDatabase() {
         ProjectId projectId = ProjectId.generate();
-        Set<ProjectChangeForEntity> emptyChanges = new LinkedHashSet<>();
 
-        NewRevisionsEvent emptyEvent = NewRevisionsEvent.create(EventId.generate(), projectId, emptyChanges, ChangeRequestId.generate());
+        NewRevisionsEvent emptyEvent = NewRevisionsEvent.create(EventId.generate(), projectId, ImmutableList.of(), ChangeRequestId.generate());
 
         handler.handleEvent(emptyEvent);
 
@@ -94,8 +94,8 @@ public class NewRevisionsEventHandlerIntegrationTest {
         ProjectId projectId2 = ProjectId.generate();
         Page<DiffElement<String, String>> emptyPage = Page.emptyPage();
 
-        Set<ProjectChangeForEntity> changesForFirstEvent = new LinkedHashSet<>();
-        Set<ProjectChangeForEntity> changesForSecondEvent = new LinkedHashSet<>();
+        List<ProjectChangeForEntity> changesForFirstEvent = new LinkedList<>();
+        List<ProjectChangeForEntity> changesForSecondEvent = new LinkedList<>();
 
         ProjectChange projectChange1 = ProjectChange.get(RevisionNumber.getRevisionNumber(1), UserId.valueOf("user1"), 12345L, "Description1", 0, emptyPage);
         ProjectChange projectChange2 = ProjectChange.get(RevisionNumber.getRevisionNumber(2), UserId.valueOf("user2"), 12346L, "Description2", 0, emptyPage);
@@ -106,8 +106,8 @@ public class NewRevisionsEventHandlerIntegrationTest {
 
         changesForSecondEvent.add(ProjectChangeForEntity.create("whoficEntityIri3", projectChange3));
 
-        NewRevisionsEvent firstEvent = NewRevisionsEvent.create(EventId.generate(), projectId1, changesForFirstEvent, ChangeRequestId.generate());
-        NewRevisionsEvent secondEvent = NewRevisionsEvent.create(EventId.generate(), projectId2, changesForSecondEvent, ChangeRequestId.generate());
+        NewRevisionsEvent firstEvent = NewRevisionsEvent.create(EventId.generate(), projectId1, ImmutableList.copyOf(changesForFirstEvent), ChangeRequestId.generate());
+        NewRevisionsEvent secondEvent = NewRevisionsEvent.create(EventId.generate(), projectId2, ImmutableList.copyOf(changesForSecondEvent), ChangeRequestId.generate());
 
         handler.handleEvent(firstEvent);
         handler.handleEvent(secondEvent);
