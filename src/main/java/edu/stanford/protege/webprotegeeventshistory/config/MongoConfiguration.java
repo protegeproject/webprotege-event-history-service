@@ -41,7 +41,9 @@ public class MongoConfiguration extends AbstractMongoClientConfiguration {
     public MongoCustomConversions customConversions() {
         return new MongoCustomConversions(Arrays.asList(
                 new ProjectIdToStringConverter(),
-                new StringToProjectIdConverter()
+                new StringToProjectIdConverter(),
+                new EntityTypeToStringConverter(),
+                new StringToEntityTypeConverter()
         ));
     }
 }
