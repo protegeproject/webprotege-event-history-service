@@ -8,6 +8,7 @@ import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.Revi
 import org.bson.Document;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.semanticweb.owlapi.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -44,9 +45,11 @@ public class GetChangedEntitiesCommandHandlerIT {
         ProjectId projectId = ProjectId.generate();
         Timestamp timestamp = new Timestamp(System.currentTimeMillis() - 10000);
 
-        insertMockRevisionsEvent(projectId, "entity1", timestamp.getTime() - 5000, ChangeType.CREATE_ENTITY);
-        insertMockRevisionsEvent(projectId, "entity2", timestamp.getTime() + 5000, ChangeType.UPDATE_ENTITY);
-        insertMockRevisionsEvent(projectId, "entity3", timestamp.getTime() + 6000, ChangeType.DELETE_ENTITY);
+        insertMockRevisionsEvent(projectId, "entity1", timestamp.getTime() - 5000, ChangeType.CREATE_ENTITY, EntityType.CLASS);
+        insertMockRevisionsEvent(projectId, "entity2", timestamp.getTime() + 5000, ChangeType.UPDATE_ENTITY, EntityType.CLASS);
+        insertMockRevisionsEvent(projectId, "entity3", timestamp.getTime() + 6000, ChangeType.DELETE_ENTITY, EntityType.CLASS);
+        insertMockRevisionsEvent(projectId, "entity4", timestamp.getTime() + 6000, ChangeType.CREATE_ENTITY, EntityType.ANNOTATION_PROPERTY);
+        insertMockRevisionsEvent(projectId, "entity5", timestamp.getTime() + 6000, ChangeType.DELETE_ENTITY, EntityType.DATATYPE);
 
         GetChangedEntitiesRequest request = GetChangedEntitiesRequest.create(projectId, timestamp.getTime());
 
@@ -63,11 +66,12 @@ public class GetChangedEntitiesCommandHandlerIT {
         assertEquals("entity3", changedEntities.deletedEntities().get(0));
     }
 
-    private void insertMockRevisionsEvent(ProjectId projectId, String entityIri, long timestamp, ChangeType changeType) {
+    private void insertMockRevisionsEvent(ProjectId projectId, String entityIri, long timestamp, ChangeType changeType, EntityType entityType) {
         RevisionsEvent revisionsEvent = RevisionsEvent.create(
                 projectId,
                 entityIri,
                 changeType,
+                entityType,
                 timestamp,
                 new Document(),
                 ChangeRequestId.generate());

@@ -4,6 +4,8 @@ import com.google.common.base.Objects;
 import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangeType;
+import org.semanticweb.owlapi.model.EntityType;
+import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.index.*;
 import org.springframework.data.mongodb.core.mapping.*;
 
@@ -14,6 +16,7 @@ public record RevisionsEvent(
         @Indexed(name = "revisionEventEntityIri")
         String whoficEntityIri,
         ChangeType changeType,
+        EntityType entityType,
         @Indexed(name = "timestamp", direction = IndexDirection.DESCENDING) long timestamp,
 
         String changeRequestId,
@@ -24,16 +27,21 @@ public record RevisionsEvent(
     public static final String PROJECT_ID = "projectId";
     public static final String TIMESTAMP = "timestamp";
     public static final String CHANGE_TYPE = "changeType";
+    public static final String ENTITY_TYPE = "entityType";
     public static final String PROJECT_CHANGE = "projectChange";
 
     public static RevisionsEvent create(ProjectId projectId,
                                         String whoficEntityIri,
                                         ChangeType changeType,
+                                        EntityType entityType,
                                         long timestamp,
                                         org.bson.Document projectChange,
                                         ChangeRequestId changeRequestId) {
-        return new RevisionsEvent(projectId.id(), whoficEntityIri, changeType, timestamp, changeRequestId != null ? changeRequestId.id() : null, projectChange);
+        return new RevisionsEvent(projectId.id(), whoficEntityIri, changeType, entityType, timestamp, changeRequestId != null ? changeRequestId.id() : null, projectChange);
     }
+
+    @PersistenceCreator
+    public RevisionsEvent{}
 
     @Override
     public boolean equals(Object o) {
@@ -44,11 +52,12 @@ public record RevisionsEvent(
                 Objects.equal(projectId, that.projectId) &&
                 Objects.equal(whoficEntityIri, that.whoficEntityIri) &&
                 Objects.equal(changeType, that.changeType) &&
+                Objects.equal(entityType, that.entityType) &&
                 Objects.equal(projectChange, that.projectChange);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(projectId, whoficEntityIri, changeType, timestamp, projectChange);
+        return Objects.hashCode(projectId, whoficEntityIri, changeType, entityType, timestamp, projectChange);
     }
 }

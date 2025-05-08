@@ -5,6 +5,7 @@ import edu.stanford.protege.webprotege.change.ProjectChange;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.dto.ChangeType;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.*;
 import org.bson.Document;
+import org.semanticweb.owlapi.model.EntityType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,11 +26,12 @@ public class RevisionEventMapper {
                 .flatMap(projectChangeForEntity -> {
                     String whoficIri = projectChangeForEntity.whoficEntityIri();
                     ChangeType changeType = projectChangeForEntity.changeType();
+                    EntityType entityType = projectChangeForEntity.entityType();
                     ProjectChange projectChange = projectChangeForEntity.projectChange();
                     long timestamp = projectChange.getTimestamp();
                     var projectChangeDocument = objectMapper.convertValue(projectChange, Document.class);
 
-                    return Stream.of(RevisionsEvent.create(newRevisionsEvent.projectId(), whoficIri, changeType, timestamp, projectChangeDocument, newRevisionsEvent.changeRequestId()));
+                    return Stream.of(RevisionsEvent.create(newRevisionsEvent.projectId(), whoficIri, changeType, entityType, timestamp, projectChangeDocument, newRevisionsEvent.changeRequestId()));
                 })
                 .toList();
     }

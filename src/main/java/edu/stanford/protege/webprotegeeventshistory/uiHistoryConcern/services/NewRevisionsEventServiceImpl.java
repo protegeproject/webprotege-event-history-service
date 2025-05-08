@@ -12,7 +12,7 @@ import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.Revi
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.ProjectChangeMapper;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.RevisionEventMapper;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.repositories.RevisionsEventRepository;
-import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
@@ -67,6 +67,7 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
                 projectId,
                 entityIriSubject,
                 null,
+                null,
                 0,
                 null,
                 null
@@ -76,6 +77,7 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
                 .withIgnorePaths(TIMESTAMP)
                 .withMatcher(WHOFIC_ENTITY_IRI, ExampleMatcher.GenericPropertyMatchers.exact())
                 .withIgnorePaths(CHANGE_TYPE)
+                .withIgnorePaths(ENTITY_TYPE)
                 .withIgnoreNullValues();
 
         Example<RevisionsEvent> example = Example.of(probe, matcher);
@@ -100,7 +102,7 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
 
     @Override
     public ChangedEntities getChangedEntitiesAfterTimestamp(ProjectId projectId, long timestamp) {
-        List<RevisionsEvent> revisionsEvents = repository.findByProjectIdAndTimestampAfter(projectId.id(), timestamp);
+        List<RevisionsEvent> revisionsEvents = repository.findByProjectIdAndEntityTypeAndTimestampAfter(projectId, EntityType.CLASS, timestamp);
 
         List<String> createdEntities = groupByChangeType(revisionsEvents, ChangeType.CREATE_ENTITY);
 
