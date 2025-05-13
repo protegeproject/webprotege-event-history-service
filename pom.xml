@@ -175,6 +175,7 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
+							<skip>true</skip>
 							<executable>docker</executable>
 							<workingDirectory>${project.basedir}</workingDirectory>
 							<arguments>
