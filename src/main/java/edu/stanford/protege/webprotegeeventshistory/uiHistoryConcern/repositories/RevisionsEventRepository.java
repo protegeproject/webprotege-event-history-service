@@ -6,7 +6,7 @@ import org.semanticweb.owlapi.model.EntityType;
 import org.springframework.data.mongodb.repository.*;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 
 public interface RevisionsEventRepository extends MongoRepository<RevisionsEvent, String> {
     @Query("{ 'projectId': ?0, 'timestamp': { $gt: ?1 } }")
@@ -16,4 +16,7 @@ public interface RevisionsEventRepository extends MongoRepository<RevisionsEvent
     List<RevisionsEvent> findByProjectIdAndEntityTypeAndTimestampAfter(ProjectId projectId, EntityType entityType, long timestamp);
     @Transactional
     void deleteByChangeRequestIdAndWhoficEntityIri(String changeRequestId, String whoficEntityIri);
+
+    Optional<RevisionsEvent> findFirstByProjectIdAndWhoficEntityIriOrderByTimestampAsc(ProjectId projectId,
+                                                                                       String whoficEntityIri);
 }

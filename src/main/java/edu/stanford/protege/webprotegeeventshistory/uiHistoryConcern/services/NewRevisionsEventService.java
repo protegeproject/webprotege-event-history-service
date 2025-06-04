@@ -17,4 +17,6 @@ public interface NewRevisionsEventService {
     ChangedEntities getChangedEntitiesAfterTimestamp(ProjectId projectId, long timestamp);
 
     EntityHistorySummary getEntityHistorySummary(ProjectId projectId, String entityIri);
+
+    Long getEntityEarliestChangeTimestamp(ProjectId projectId, String entityIri);
 }

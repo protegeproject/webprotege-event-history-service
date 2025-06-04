@@ -137,4 +137,13 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
 
         return EntityHistorySummary.create(entityIri, projectId.value(), entityChanges);
     }
+
+
+    @Override
+    public Long getEntityEarliestChangeTimestamp(ProjectId projectId, String entityIri) {
+        return repository
+                .findFirstByProjectIdAndWhoficEntityIriOrderByTimestampAsc(projectId, entityIri)
+                .map(RevisionsEvent::timestamp)
+                .orElse(null);
+    }
 }
