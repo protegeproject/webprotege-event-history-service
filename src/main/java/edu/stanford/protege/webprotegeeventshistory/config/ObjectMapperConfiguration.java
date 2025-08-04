@@ -19,6 +19,7 @@ import edu.stanford.protege.webprotege.tag.*;
 import edu.stanford.protege.webprotege.watches.*;
 import edu.stanford.protege.webprotegeeventshistory.config.events.UpdateUiHistoryEvent;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.NewRevisionsEvent;
+import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.ParentsChangedEvent;
 import org.semanticweb.owlapi.model.*;
 import org.springframework.context.annotation.*;
 import uk.ac.manchester.cs.owl.owlapi.*;
@@ -309,6 +310,7 @@ public class ObjectMapperConfiguration {
                 ProjectChangedEvent.class,
                 UpdateUiHistoryEvent.class,
                 NewRevisionsEvent.class,
+                ParentsChangedEvent.class,
                 ProjectMovedToTrashEvent.class,
                 OntologyChangedEvent.class,
                 ProjectRemovedFromTrashEvent.class,
