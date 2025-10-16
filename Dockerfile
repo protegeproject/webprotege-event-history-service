@@ -1,4 +1,5 @@
-FROM openjdk:17
+FROM eclipse-temurin:17-jre-jammy
+
 MAINTAINER protege.stanford.edu
 
 EXPOSE 7761
