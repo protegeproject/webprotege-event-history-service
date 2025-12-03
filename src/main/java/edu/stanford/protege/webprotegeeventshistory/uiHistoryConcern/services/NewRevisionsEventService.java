@@ -12,7 +12,7 @@ public interface NewRevisionsEventService {
 
     void registerEvent(NewRevisionsEvent newLinRevEvent);
 
-    Page<ProjectChange> fetchPaginatedProjectChanges(ProjectId projectId, Optional<OWLEntity> subject, int pageNumber, int pageSize);
+    Page<ProjectChange> fetchPaginatedProjectChanges(ProjectId projectId, Optional<OWLEntity> subject, int pageNumber, int pageSize, String filter);
 
     ChangedEntities getChangedEntitiesAfterTimestamp(ProjectId projectId, long timestamp);
 

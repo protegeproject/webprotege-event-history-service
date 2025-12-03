@@ -82,7 +82,7 @@ public class NewRevisionsEventServiceTest {
         ProjectChange mockProjectChange = mock(ProjectChange.class);
         when(projectChangeMapper.mapProjectChangeDocumentToProjectChange(any())).thenReturn(mockProjectChange);
 
-        Page<ProjectChange> result = service.fetchPaginatedProjectChanges(projectId, Optional.of(mockEntity), 1, 1);
+        Page<ProjectChange> result = service.fetchPaginatedProjectChanges(projectId, Optional.of(mockEntity), 1, 1, "");
 
         assertNotNull(result);
         assertEquals(1, result.getPageElements().size());
@@ -104,7 +104,7 @@ public class NewRevisionsEventServiceTest {
         ProjectChange mockProjectChange = mock(ProjectChange.class);
         when(projectChangeMapper.mapProjectChangeDocumentToProjectChange(any())).thenReturn(mockProjectChange);
 
-        Page<ProjectChange> result = service.fetchPaginatedProjectChanges(projectId, Optional.empty(), 1, 1);
+        Page<ProjectChange> result = service.fetchPaginatedProjectChanges(projectId, Optional.empty(), 1, 1, "");
 
         assertNotNull(result);
         assertEquals(1, result.getPageElements().size());
@@ -122,7 +122,7 @@ public class NewRevisionsEventServiceTest {
 
         when(repository.findAll(any(Example.class), eq(pageRequest))).thenReturn(mockPage);
 
-        Page<ProjectChange> result = service.fetchPaginatedProjectChanges(projectId, Optional.empty(), 1, 1);
+        Page<ProjectChange> result = service.fetchPaginatedProjectChanges(projectId, Optional.empty(), 1, 1, "");
 
         assertNotNull(result);
         assertTrue(result.getPageElements().isEmpty());
