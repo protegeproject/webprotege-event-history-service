@@ -13,7 +13,8 @@ import static edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.hand
 public record ProjectChangesForHistoryViewRequest(
         @JsonProperty("projectId") ProjectId projectId,
         @JsonProperty("subject") Optional<OWLEntity> subject,
-        @JsonProperty("pageRequest") PageRequest pageRequest
+        @JsonProperty("pageRequest") PageRequest pageRequest,
+        @JsonProperty("filter") String filter
 ) implements ProjectRequest<ProjectChangesForHistoryViewResponse> {
 
     public final static String CHANNEL = "webprotege.events.projects.history.ProjectChangesForHistory";

@@ -51,7 +51,7 @@ public class GetProjectChangesForHistoryViewCommandHandlerIntegrationTest {
         ProjectId projectId = ProjectId.generate();
         OWLEntity subject = mockOWLEntity("http://example.com/Entity1");
         PageRequest pageRequest = PageRequest.requestPageWithSize(1, 10);
-        ProjectChangesForHistoryViewRequest request = new ProjectChangesForHistoryViewRequest(projectId, Optional.of(subject), pageRequest);
+        ProjectChangesForHistoryViewRequest request = new ProjectChangesForHistoryViewRequest(projectId, Optional.of(subject), pageRequest, "");
 
         ProjectChange pc1 = insertMockRevisionsEvent(projectId, "http://example.com/Entity1", 12345L);
         ProjectChange pc2 = insertMockRevisionsEvent(projectId, "http://example.com/Entity1", 12346L);
@@ -73,7 +73,7 @@ public class GetProjectChangesForHistoryViewCommandHandlerIntegrationTest {
     public void GIVEN_validRequestWithoutSubject_WHEN_handleRequestCalled_THEN_returnAllProjectChanges() {
         ProjectId projectId = ProjectId.generate();
         PageRequest pageRequest = PageRequest.requestPageWithSize(1, 10);
-        ProjectChangesForHistoryViewRequest request = new ProjectChangesForHistoryViewRequest(projectId, Optional.empty(), pageRequest);
+        ProjectChangesForHistoryViewRequest request = new ProjectChangesForHistoryViewRequest(projectId, Optional.empty(), pageRequest, "");
 
         ProjectChange pc1 = insertMockRevisionsEvent(projectId, "http://example.com/Entity1", 12345L);
         ProjectChange pc2 = insertMockRevisionsEvent(projectId, "http://example.com/Entity1", 12346L);
@@ -96,7 +96,7 @@ public class GetProjectChangesForHistoryViewCommandHandlerIntegrationTest {
     public void GIVEN_emptyProject_WHEN_handleRequestCalled_THEN_returnEmptyPage() {
         ProjectId projectId = ProjectId.generate();
         PageRequest pageRequest = PageRequest.requestPageWithSize(1, 10);
-        ProjectChangesForHistoryViewRequest request = new ProjectChangesForHistoryViewRequest(projectId, Optional.empty(), pageRequest);
+        ProjectChangesForHistoryViewRequest request = new ProjectChangesForHistoryViewRequest(projectId, Optional.empty(), pageRequest, "");
 
 
         Mono<ProjectChangesForHistoryViewResponse> responseMono = commandHandler.handleRequest(request, null);
@@ -111,7 +111,7 @@ public class GetProjectChangesForHistoryViewCommandHandlerIntegrationTest {
     public void GIVEN_requestWithPagination_WHEN_handleRequestCalled_THEN_returnPaginatedResults() {
         ProjectId projectId = ProjectId.generate();
         PageRequest pageRequest = PageRequest.requestPageWithSize(1, 1);
-        ProjectChangesForHistoryViewRequest request = new ProjectChangesForHistoryViewRequest(projectId, Optional.empty(), pageRequest);
+        ProjectChangesForHistoryViewRequest request = new ProjectChangesForHistoryViewRequest(projectId, Optional.empty(), pageRequest, "");
 
         insertMockRevisionsEvent(projectId, "http://example.com/Entity1", 12345L);
         insertMockRevisionsEvent(projectId, "http://example.com/Entity2", 12346L);

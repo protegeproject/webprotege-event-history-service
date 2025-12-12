@@ -33,7 +33,7 @@ public class GetProjectChangesForHistoryViewCommandHandler implements CommandHan
     public Mono<ProjectChangesForHistoryViewResponse> handleRequest(ProjectChangesForHistoryViewRequest request, ExecutionContext executionContext) {
         int pageNumber = request.pageRequest().getPageNumber();
         int pageSize = request.pageRequest().getPageSize();
-        var changes = service.fetchPaginatedProjectChanges(request.projectId(), request.subject(), pageNumber, pageSize);
+        var changes = service.fetchPaginatedProjectChanges(request.projectId(), request.subject(), pageNumber, pageSize, request.filter());
         return Mono.just(ProjectChangesForHistoryViewResponse.create(changes));
     }
 }

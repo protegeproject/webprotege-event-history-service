@@ -12,6 +12,7 @@ import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.events.Revi
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.ProjectChangeMapper;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.mappers.RevisionEventMapper;
 import edu.stanford.protege.webprotegeeventshistory.uiHistoryConcern.repositories.RevisionsEventRepository;
+import org.bson.Document;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,8 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
     }
 
     @Override
-    public Page<ProjectChange> fetchPaginatedProjectChanges(ProjectId projectId, Optional<OWLEntity> subject, int pageNumber, int pageSize) {
+    public Page<ProjectChange> fetchPaginatedProjectChanges(ProjectId projectId, Optional<OWLEntity> subject, int pageNumber, int pageSize, String filter) {
+        LOGGER.warn("Fetching changes with filter: {}", filter);
         String entityIriSubject = subject.map(sub -> sub.getIRI().toString()).orElse(null);
         RevisionsEvent probe = RevisionsEvent.create(
                 projectId,
@@ -69,7 +71,7 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
                 null,
                 null,
                 0,
-                null,
+                new Document("summary", filter),
                 null
         );
         ExampleMatcher matcher = ExampleMatcher.matching()
@@ -78,6 +80,7 @@ public class NewRevisionsEventServiceImpl implements NewRevisionsEventService {
                 .withMatcher(WHOFIC_ENTITY_IRI, ExampleMatcher.GenericPropertyMatchers.exact())
                 .withIgnorePaths(CHANGE_TYPE)
                 .withIgnorePaths(ENTITY_TYPE)
+                .withMatcher("projectChange.summary", m -> m.contains().ignoreCase())
                 .withIgnoreNullValues();
 
         Example<RevisionsEvent> example = Example.of(probe, matcher);
