@@ -64,8 +64,13 @@ public class HighLevelBusinessEventsService {
             LOGGER.info("Logging event " + event);
             repository.save(event);
         } catch (Exception e) {
+            // Do not swallow a failed archive write: a change that never reaches this store is
+            // permanently absent from catch-up history (#299). Rethrow so the events listener
+            // container redelivers the message. HighLevelBusinessEvent uses eventId as its Mongo
+            // @Id, so a redelivered event upserts instead of duplicating; the bounded retry policy
+            // in EventListenerRetryConfiguration stops a genuinely poison message from hot-looping.
             LOGGER.error("An error occurred when trying to save events", e);
-            return;
+            throw e;
         }
         publishSequencedEvent(projectEvent, seq);
     }

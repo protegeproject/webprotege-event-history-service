@@ -27,6 +27,7 @@ import java.util.List;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -124,11 +125,13 @@ public class HighLevelBusinessEventsServiceTest {
     }
 
     @Test
-    public void GIVEN_saveFails_WHEN_registerEvent_THEN_noSequencedEventIsPublished() {
+    public void GIVEN_saveFails_WHEN_registerEvent_THEN_exceptionPropagatesAndNoSequencedEventIsPublished() {
         when(repository.save(any(HighLevelBusinessEvent.class))).thenThrow(new RuntimeException("boom"));
 
-        service.registerEvent(packagedProjectChangeEvent);
+        // The failure must surface so the listener container redelivers rather than acking a lost event.
+        assertThrows(RuntimeException.class, () -> service.registerEvent(packagedProjectChangeEvent));
 
+        // ...and the sequenced re-publish must not run for an event that was never archived.
         org.mockito.Mockito.verifyNoInteractions(eventDispatcher);
     }
 

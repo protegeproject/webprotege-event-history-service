@@ -39,6 +39,9 @@ public class HighLevelBusinessEventsIntegrationTest extends IntegrationTest {
     @Autowired
     private GetLatestProjectEventsCommandHandler commandHandler;
 
+    @Autowired
+    private HighLevelBusinessEventsService service;
+
     @MockBean
     private SimpMessagingTemplate simpleMessagingTemplate;
 
@@ -77,6 +80,27 @@ public class HighLevelBusinessEventsIntegrationTest extends IntegrationTest {
         HighLevelBusinessEvent event = eventList.get(0);
         assertEquals(packagedProjectChangeEvent.eventId().id(), event.eventId());
     }
+
+    @Test
+    public void GIVEN_sameEventRegisteredTwice_WHEN_redelivered_THEN_archiveDoesNotDuplicate() {
+        var entityTagsChangedEvent = new EntityTagsChangedEvent(new EventId("eventId"),
+                projectId,
+                new OWLClassImpl(IRI.create("http://www.example.org/dedupe")),
+                new ArrayList<>());
+        var eventId = EventId.generate();
+        var packagedProjectChangeEvent = new PackagedProjectChangeEvent(projectId, eventId, Arrays.asList(entityTagsChangedEvent));
+
+        // A redelivered message replays the same eventId (Mongo @Id), so the second save upserts
+        // rather than inserting a duplicate row.
+        service.registerEvent(packagedProjectChangeEvent);
+        service.registerEvent(packagedProjectChangeEvent);
+
+        long copies = eventsRepository.findAll().stream()
+                .filter(e -> e.eventId().equals(eventId.id()))
+                .count();
+        assertEquals(1, copies);
+    }
+
 
     @Test
     public void GIVEN_multipleEvents_WHEN_fetchEvents_THEN_onlyNewerEventsAreReturned(){
