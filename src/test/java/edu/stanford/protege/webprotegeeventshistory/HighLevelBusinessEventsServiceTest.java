@@ -4,10 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.webprotege.common.EventId;
 import edu.stanford.protege.webprotege.common.ProjectId;
+import edu.stanford.protege.webprotege.ipc.EventDispatcher;
 import edu.stanford.protege.webprotege.tag.EntityTagsChangedEvent;
 import edu.stanford.protege.webprotegeeventshistory.config.ObjectMapperConfiguration;
 import edu.stanford.protege.webprotegeeventshistory.dto.*;
-import edu.stanford.protege.webprotegeeventshistory.sequence.SequenceService;
+import edu.stanford.protege.webprotegeeventshistory.sequence.ProjectSequenceService;
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,8 +17,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semanticweb.owlapi.model.IRI;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.support.GenericMessage;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
 import java.util.ArrayList;
@@ -27,6 +26,7 @@ import java.util.List;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,7 +39,10 @@ public class HighLevelBusinessEventsServiceTest {
     private HighLevelBusinessEventsRepository repository;
 
     @Mock
-    private SequenceService sequenceService;
+    private ProjectSequenceService projectSequenceService;
+
+    @Mock
+    private EventDispatcher eventDispatcher;
 
     private HighLevelBusinessEventsService service;
 
@@ -57,7 +60,7 @@ public class HighLevelBusinessEventsServiceTest {
     @Before
     public void setUp() {
         objectMapper = new ObjectMapperConfiguration().objectMapper();
-        service = new HighLevelBusinessEventsService(repository, objectMapper, sequenceService);
+        service = new HighLevelBusinessEventsService(repository, objectMapper, projectSequenceService, eventDispatcher);
         projectId = ProjectId.generate();
         eventId = EventId.generate();
         entityTagsChangedEvent = new EntityTagsChangedEvent(new EventId("eventId"),
@@ -65,7 +68,7 @@ public class HighLevelBusinessEventsServiceTest {
                 new OWLClassImpl(IRI.create("http://www.example.org/R9UuCy8Vzvft2f4fc67VwGs")),
                 new ArrayList<>());
         packagedProjectChangeEvent = new PackagedProjectChangeEvent(projectId, eventId, List.of(entityTagsChangedEvent));
-        when(sequenceService.getNextHighLevelEventSequence()).thenReturn(1);
+        when(projectSequenceService.next(projectId.id())).thenReturn(1);
     }
 
     @Test
@@ -99,6 +102,32 @@ public class HighLevelBusinessEventsServiceTest {
         LinkedHashMap<String,Document> entityDocument = eventsDocument.get("entity");
 
         assertEquals("http://www.example.org/R9UuCy8Vzvft2f4fc67VwGs", entityDocument.get("iri"));
+    }
+
+    @Test
+    public void GIVEN_entityTagsChangedEvent_WHEN_registerEvent_THEN_sequencedEventIsPublished() {
+        service.registerEvent(packagedProjectChangeEvent);
+
+        ArgumentCaptor<SequencedPackagedProjectChangeEvent> publishCaptor =
+                ArgumentCaptor.forClass(SequencedPackagedProjectChangeEvent.class);
+        verify(eventDispatcher).dispatchEvent(publishCaptor.capture());
+        var published = publishCaptor.getValue();
+
+        assertEquals(SequencedPackagedProjectChangeEvent.CHANNEL, published.getChannel());
+        assertEquals(1, published.sequenceNumber());
+        assertEquals(projectId, published.projectId());
+        assertEquals(eventId, published.eventId());
+        assertEquals(1, published.projectEvents().size());
+        assertEquals(entityTagsChangedEvent, published.projectEvents().get(0));
+    }
+
+    @Test
+    public void GIVEN_saveFails_WHEN_registerEvent_THEN_noSequencedEventIsPublished() {
+        when(repository.save(any(HighLevelBusinessEvent.class))).thenThrow(new RuntimeException("boom"));
+
+        service.registerEvent(packagedProjectChangeEvent);
+
+        org.mockito.Mockito.verifyNoInteractions(eventDispatcher);
     }
 
     @Test
