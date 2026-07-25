@@ -8,12 +8,14 @@ import edu.stanford.protege.webprotegeeventshistory.sequence.ProjectSequenceServ
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -30,6 +32,11 @@ public class HighLevelBusinessEventsService {
 
     private final EventDispatcher eventDispatcher;
 
+    // Caps how many archived events a single catch-up response may carry, so a project open never
+    // replays the whole (unbounded) history in one shot. A far-behind client pages forward over
+    // successive polls. Configurable via webprotege.events.query.window-size (default 500).
+    private final int windowSize;
+
 
     // EventDispatcher is injected lazily to break a bean-creation cycle: the ipc EventDispatcher
     // depends on RabbitMQEventsConfiguration, which eagerly wires every EventHandler, one of which
@@ -37,11 +44,13 @@ public class HighLevelBusinessEventsService {
     public HighLevelBusinessEventsService(HighLevelBusinessEventsRepository repository,
                                           ObjectMapper objectMapper,
                                           ProjectSequenceService projectSequenceService,
-                                          @Lazy EventDispatcher eventDispatcher) {
+                                          @Lazy EventDispatcher eventDispatcher,
+                                          @Value("${webprotege.events.query.window-size:500}") int windowSize) {
         this.repository = repository;
         this.objectMapper = objectMapper;
         this.projectSequenceService = projectSequenceService;
         this.eventDispatcher = eventDispatcher;
+        this.windowSize = windowSize;
     }
 
 
@@ -81,10 +90,24 @@ public class HighLevelBusinessEventsService {
 
         ProjectEventsQueryResponse response = new ProjectEventsQueryResponse();
 
+        // Anchor mode (#301): the client only wants the current head so it can begin listening for
+        // live updates without downloading history. Skip Mongo entirely and return an empty window
+        // whose start and end are both the current sequence head.
+        if (request.latestOnly) {
+            EventTag head = EventTag.get(projectSequenceService.getCurrentSequence(request.projectId.id()));
+            response.events = new EventList<ProjectEvent>(head, List.of(), head);
+            return response;
+        }
+
         EventTag first = request.sinceTag == null ? EventTag.getFirst() : request.sinceTag;
 
-        List<HighLevelBusinessEvent> mongoResponse = repository.findByTimeStampGreaterThanAndProjectId(first.getOrdinal(), request.projectId.id());
-        mongoResponse.sort(Comparator.comparing(HighLevelBusinessEvent::timeStamp));
+        // Bounded, ordered page: never replay the whole archive in a single response. The query is
+        // capped at windowSize and sorted ascending by ordinal, so the last row is the end of this
+        // window; endTag reflects that, letting a far-behind client page forward on later polls.
+        List<HighLevelBusinessEvent> mongoResponse = repository.findByProjectIdAndTimeStampGreaterThan(
+                request.projectId.id(),
+                first.getOrdinal(),
+                PageRequest.of(0, windowSize, Sort.by(Sort.Direction.ASC, "timeStamp")));
         EventTag last;
         if(mongoResponse.size() > 0) {
             last = EventTag.get(mongoResponse.get(mongoResponse.size() -1).timeStamp());

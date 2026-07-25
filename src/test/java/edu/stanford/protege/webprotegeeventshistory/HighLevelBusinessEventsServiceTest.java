@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semanticweb.owlapi.model.IRI;
+import org.springframework.data.domain.Pageable;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import static junit.framework.TestCase.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -60,7 +62,7 @@ public class HighLevelBusinessEventsServiceTest {
     @Before
     public void setUp() {
         objectMapper = new ObjectMapperConfiguration().objectMapper();
-        service = new HighLevelBusinessEventsService(repository, objectMapper, projectSequenceService, eventDispatcher);
+        service = new HighLevelBusinessEventsService(repository, objectMapper, projectSequenceService, eventDispatcher, 500);
         projectId = ProjectId.generate();
         eventId = EventId.generate();
         entityTagsChangedEvent = new EntityTagsChangedEvent(new EventId("eventId"),
@@ -133,7 +135,7 @@ public class HighLevelBusinessEventsServiceTest {
     @Test
     public void GIVEN_fetchTag_WHEN_fetchEvents_THEN_eventsAreMapped() {
         HighLevelBusinessEvent businessEvent = new HighLevelBusinessEvent("eventId", projectId.id(), 5, objectMapper.convertValue(packagedProjectChangeEvent, Document.class));
-        when(repository.findByTimeStampGreaterThanAndProjectId(eq(2), eq(projectId.id()))).thenReturn(Arrays.asList(businessEvent));
+        when(repository.findByProjectIdAndTimeStampGreaterThan(eq(projectId.id()), eq(2), any(Pageable.class))).thenReturn(Arrays.asList(businessEvent));
         ProjectEventsQueryRequest request = new ProjectEventsQueryRequest();
         request.sinceTag = EventTag.get(2);
         request.projectId = projectId;
@@ -149,7 +151,7 @@ public class HighLevelBusinessEventsServiceTest {
 
     @Test
     public void GIVEN_emptyListOnRepository_WHEN_fetchEvents_THEN_startTagIsSameAsEndTag(){
-        when(repository.findByTimeStampGreaterThanAndProjectId(eq(2),eq(projectId.id()))).thenReturn(new ArrayList<>());
+        when(repository.findByProjectIdAndTimeStampGreaterThan(eq(projectId.id()), eq(4), any(Pageable.class))).thenReturn(new ArrayList<>());
         ProjectEventsQueryRequest request = new ProjectEventsQueryRequest();
         request.sinceTag = EventTag.get(4);
         request.projectId = projectId;
@@ -159,6 +161,46 @@ public class HighLevelBusinessEventsServiceTest {
         assertEquals(4, response.events.endTag().getOrdinal());
         assertEquals(4, response.events.startTag().getOrdinal());
 
+    }
+
+    @Test
+    public void GIVEN_latestOnly_WHEN_fetchEvents_THEN_emptyWindowAtHeadAndNoRowsRead() {
+        when(projectSequenceService.getCurrentSequence(projectId.id())).thenReturn(7);
+        ProjectEventsQueryRequest request = new ProjectEventsQueryRequest();
+        request.latestOnly = true;
+        request.projectId = projectId;
+
+        ProjectEventsQueryResponse response = service.fetchEvents(request);
+
+        assertNotNull(response.events);
+        assertEquals(0, response.events.events().size());
+        // Anchor at the current head: first == last == head, and no event rows are touched.
+        assertEquals(7, response.events.startTag().getOrdinal());
+        assertEquals(7, response.events.endTag().getOrdinal());
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    public void GIVEN_multipleEvents_WHEN_fetchEvents_THEN_windowIsCappedAndEndTagIsWindowMax() {
+        HighLevelBusinessEvent third = new HighLevelBusinessEvent("e3", projectId.id(), 3, objectMapper.convertValue(packagedProjectChangeEvent, Document.class));
+        HighLevelBusinessEvent fourth = new HighLevelBusinessEvent("e4", projectId.id(), 4, objectMapper.convertValue(packagedProjectChangeEvent, Document.class));
+        when(repository.findByProjectIdAndTimeStampGreaterThan(eq(projectId.id()), eq(2), any(Pageable.class)))
+                .thenReturn(Arrays.asList(third, fourth));
+        ProjectEventsQueryRequest request = new ProjectEventsQueryRequest();
+        request.sinceTag = EventTag.get(2);
+        request.projectId = projectId;
+
+        ProjectEventsQueryResponse response = service.fetchEvents(request);
+
+        // endTag is the last ordinal in the returned window, so a far-behind client pages forward.
+        assertEquals(2, response.events.startTag().getOrdinal());
+        assertEquals(4, response.events.endTag().getOrdinal());
+        assertEquals(2, response.events.events().size());
+
+        // The query is bounded: a window-sized Pageable is passed to the repository.
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(repository).findByProjectIdAndTimeStampGreaterThan(eq(projectId.id()), eq(2), pageableCaptor.capture());
+        assertEquals(500, pageableCaptor.getValue().getPageSize());
     }
 
 }
