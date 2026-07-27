@@ -18,6 +18,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
@@ -36,6 +38,9 @@ public class HighLevelBusinessEventsIntegrationTest extends IntegrationTest {
 
     @Autowired
     private GetLatestProjectEventsCommandHandler commandHandler;
+
+    @Autowired
+    private HighLevelBusinessEventsService service;
 
     @MockBean
     private SimpMessagingTemplate simpleMessagingTemplate;
@@ -67,12 +72,33 @@ public class HighLevelBusinessEventsIntegrationTest extends IntegrationTest {
 
         Thread.sleep(5000);
 
-        List<HighLevelBusinessEvent> eventList = eventsRepository.findByTimeStampGreaterThanAndProjectId(0, projectId.id());
+        List<HighLevelBusinessEvent> eventList = eventsRepository.findByProjectIdAndTimeStampGreaterThan(
+                projectId.id(), 0, PageRequest.of(0, 500, Sort.by(Sort.Direction.ASC, "timeStamp")));
 
         assertNotNull(eventList);
         assertEquals(1, eventList.size());
         HighLevelBusinessEvent event = eventList.get(0);
         assertEquals(packagedProjectChangeEvent.eventId().id(), event.eventId());
+    }
+
+    @Test
+    public void GIVEN_sameEventRegisteredTwice_WHEN_redelivered_THEN_archiveDoesNotDuplicate() {
+        var entityTagsChangedEvent = new EntityTagsChangedEvent(new EventId("eventId"),
+                projectId,
+                new OWLClassImpl(IRI.create("http://www.example.org/dedupe")),
+                new ArrayList<>());
+        var eventId = EventId.generate();
+        var packagedProjectChangeEvent = new PackagedProjectChangeEvent(projectId, eventId, Arrays.asList(entityTagsChangedEvent));
+
+        // A redelivered message replays the same eventId (Mongo @Id), so the second save upserts
+        // rather than inserting a duplicate row.
+        service.registerEvent(packagedProjectChangeEvent);
+        service.registerEvent(packagedProjectChangeEvent);
+
+        long copies = eventsRepository.findAll().stream()
+                .filter(e -> e.eventId().equals(eventId.id()))
+                .count();
+        assertEquals(1, copies);
     }
 
 

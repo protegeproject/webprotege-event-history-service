@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -17,6 +18,9 @@ import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+// Each subclass starts its own Mongo/Rabbit containers on fresh ports in @BeforeClass and closes
+// them in @AfterClass, so the Spring context must not be cached and reused across subclasses.
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Import({WebProtegeIpcApplication.class, WebprotegeEventsHistoryApplication.class, RabbitMQEventsConfiguration.class})
 public abstract class IntegrationTest {
 
